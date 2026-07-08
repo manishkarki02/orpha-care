@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # Dummy values so backend/src/config/env.config.ts's schema validation
+      # (and `prisma generate`, which needs DATABASE_URL just to parse config)
+      # succeed in CI. All service tests mock @/db and never hit a real database.
+      API_URL: http://localhost:8000/api
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      FRONTEND_URL: http://localhost:5173
+      SWAGGER_HOST: http://localhost:8000
+      CORS_ORIGIN: http://localhost:5173
+      ACCESS_TOKEN_SECRET: ci_access_token_secret_placeholder
+      REFRESH_TOKEN_SECRET: ci_refresh_token_secret_placeholder
+      SMTP_HOST: smtp.example.com
+      SMTP_PORT: "587"
+      SMTP_USER: ci_smtp_user
+      SMTP_PASS: ci_smtp_pass
+      SMTP_FROM: ci@orphacare.local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run prisma:generate
+      - run: pnpm run build
+      - run: pnpm test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: pnpm test

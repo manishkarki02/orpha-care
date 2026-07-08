@@ -11,7 +11,8 @@
     "biome:check": "biome check",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test": "vitest run"
   },
   "keywords": [
     "nodejs",
@@ -37,7 +38,8 @@
     "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^7.0.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.1",
