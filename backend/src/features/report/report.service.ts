@@ -49,6 +49,9 @@ export const createMissingReport = async (
 
 export const fetchAllMissingReports = async (reporterId: string) => {
   const missingReports = await prisma.missingReport.findMany({
+    where: {
+      reporterId: { not: reporterId },
+    },
     select: {
       id: true,
       name: true,

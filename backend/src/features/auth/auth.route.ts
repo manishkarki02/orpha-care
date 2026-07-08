@@ -1,6 +1,7 @@
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import {
   loginRequestSchema,
+  refreshTokenRequestSchema,
   registerRequestSchema,
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
@@ -174,6 +175,49 @@ router.post(
   "/signin",
   validationMiddleware(loginRequestSchema),
   catchAsync(authController.loginUser)
+);
+
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Exchange a refresh token for a new access token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                     refreshToken:
+ *                       type: string
+ *       401:
+ *         description: Invalid or expired refresh token
+ */
+router.post(
+  "/refresh",
+  validationMiddleware(refreshTokenRequestSchema),
+  catchAsync(authController.refreshAccessToken)
 );
 
 /**

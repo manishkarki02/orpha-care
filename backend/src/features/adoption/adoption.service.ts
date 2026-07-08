@@ -37,7 +37,6 @@ export const createAdoptionKid = async (
       name: body.name,
       surname: body.surName,
       age: body.age,
-      caste: body.caste,
       gender: body.gender,
       province: body.province,
       description: body.description,
@@ -55,10 +54,6 @@ export const fetchAllAdoptionKids = async (
   query: FetchAdoptionRequestsSchema["query"]
 ) => {
   let queryFilter: { [key: string]: any } = {};
-  if (query.caste) {
-    queryFilter.caste = query.caste;
-  }
-
   if (query.gender) {
     queryFilter.gender = query.gender;
   }
@@ -117,7 +112,6 @@ export const updateAdoptionKid = async (
       name: data.name,
       surname: data.surName,
       age: data.age,
-      caste: data.caste,
       gender: data.gender,
       province: data.province,
       description: data.description,
@@ -129,6 +123,29 @@ export const updateAdoptionKid = async (
   }
 
   return updatedKid;
+};
+
+// Get the current user's own adoption requests
+export const fetchMyAdoptionRequests = async (adopterId: string) => {
+  const requests = await prisma.adoptionRequest.findMany({
+    where: { adopterId },
+    include: { kid: true },
+  });
+
+  return requests;
+};
+
+// Get all pending adoption requests (kids not yet adopted) — ADMIN only
+export const fetchPendingAdoptionRequests = async () => {
+  const requests = await prisma.adoptionRequest.findMany({
+    where: { kid: { isAdopted: false } },
+    include: {
+      kid: true,
+      adopter: { select: { id: true, name: true, email: true, phone: true } },
+    },
+  });
+
+  return requests;
 };
 
 // Delete a kid by ID
@@ -172,7 +189,10 @@ export const requestForAdoption = async (kidId: string, adopterId: string) => {
       kid: { connect: { id: kidId } },
       adopter: { connect: { id: adopterId } },
     },
-    include: { kid: true, adopter: true },
+    include: {
+      kid: true,
+      adopter: { select: { id: true, name: true, email: true, phone: true } },
+    },
   });
 
   if (!createdAdoptionRequest) {

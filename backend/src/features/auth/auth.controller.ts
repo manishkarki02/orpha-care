@@ -4,6 +4,7 @@ import ApiResponse from "@/common/utils/response.utils";
 import { ValidatedRequestHandler } from "@/common/types";
 import {
   LoginRequestSchema,
+  RefreshTokenRequestSchema,
   RegisterRequestSchema,
   ResendVerificationRequestSchema,
   ResetPasswordRequestSchema,
@@ -88,6 +89,27 @@ export const loginUser: ValidatedRequestHandler<LoginRequestSchema> = async (
   return ApiResponse.success(res, {
     statusCode: HttpStatus.OK,
     message: "Login successful.",
+    data: responseData,
+  });
+};
+
+export const refreshAccessToken: ValidatedRequestHandler<
+  RefreshTokenRequestSchema
+> = async (req, res) => {
+  const responseData = await authService.refreshAccessToken(
+    req.body.refreshToken
+  );
+
+  setCookie(res, {
+    cookieName: "REFRESH_TOKEN",
+    path: "/refresh",
+    value: responseData.refreshToken,
+    expiry: Environment.get("REFRESH_TOKEN_EXPIRY"),
+  });
+
+  return ApiResponse.success(res, {
+    statusCode: HttpStatus.OK,
+    message: "Token refreshed successfully.",
     data: responseData,
   });
 };

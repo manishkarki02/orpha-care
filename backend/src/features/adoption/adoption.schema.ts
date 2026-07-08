@@ -1,12 +1,10 @@
-import { Caste, Gender, Province } from "@/generated/prisma/enums";
+import { Gender, Province } from "@/generated/prisma/enums";
 import z from "zod/v4";
 
 const nameSchema = (type: string) =>
   z.string().trim().nonempty(`${type} is required`);
 
 const genderSchema = z.enum(Object.values(Gender));
-
-const casteSchema = z.enum(Object.values(Caste));
 
 const fileSchema = z.object({
   fieldname: z.string(),
@@ -35,7 +33,6 @@ export const createAdoptionRequestSchema = z.object({
       .number()
       .min(0, "Age must be a non-negative number")
       .max(14, "Age must be less than or equal to 14"),
-    caste: casteSchema,
     gender: genderSchema,
     province: z.enum(Object.values(Province)),
     description: z
@@ -54,7 +51,6 @@ export const adoptionRequestIdSchema = z.object({
 
 export const fetchAdoptionRequestsSchema = z.object({
   query: z.object({
-    caste: z.enum(Object.values(Caste)).optional(),
     minAge: z.coerce.number().int().nonnegative().optional(),
     maxAge: z.coerce.number().int().nonnegative().optional(),
     gender: genderSchema.optional(),

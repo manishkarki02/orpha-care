@@ -81,6 +81,12 @@ export const loginRequestSchema = z.object({
   ),
 });
 
+export const refreshTokenRequestSchema = z.object({
+  body: z.object({
+    refreshToken: z.string().trim().nonempty("Refresh token is required"),
+  }),
+});
+
 export type RegisterRequestSchema = z.infer<typeof registerRequestSchema>;
 export type VerificationRequestSchema = z.infer<
   typeof verificationRequestSchema
@@ -92,3 +98,6 @@ export type ResetPasswordRequestSchema = z.infer<
   typeof resetPasswordRequestSchema
 >;
 export type LoginRequestSchema = z.infer<typeof loginRequestSchema>;
+export type RefreshTokenRequestSchema = z.infer<
+  typeof refreshTokenRequestSchema
+>;

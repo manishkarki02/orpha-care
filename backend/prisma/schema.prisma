@@ -12,13 +12,6 @@ enum Role {
   USER
 }
 
-enum Caste {
-  Brahmin
-  Kshatriya
-  Vaishya
-  Sudra
-}
-
 enum Province {
   Koshi
   Madhesh
@@ -102,7 +95,6 @@ model KidsForAdoption {
   name        String
   surname     String
   age         Int
-  caste       Caste
   gender      Gender
   province    Province
   description String

@@ -51,6 +51,36 @@ export const fetchAdoptionKidDetails: ValidatedRequestHandler<
   });
 };
 
+// Get the current user's own adoption requests
+export const fetchMyAdoptionRequests: ValidatedRequestHandler = async (
+  req,
+  res
+) => {
+  const requests = await adoptionService.fetchMyAdoptionRequests(
+    res.locals.userId
+  );
+
+  return ApiResponse.success(res, {
+    statusCode: HttpStatus.OK,
+    message: "Adoption requests fetched successfully.",
+    data: requests,
+  });
+};
+
+// Get all pending adoption requests (ADMIN only)
+export const fetchPendingAdoptionRequests: ValidatedRequestHandler = async (
+  _req,
+  res
+) => {
+  const requests = await adoptionService.fetchPendingAdoptionRequests();
+
+  return ApiResponse.success(res, {
+    statusCode: HttpStatus.OK,
+    message: "Pending adoption requests fetched successfully.",
+    data: requests,
+  });
+};
+
 // Update a kid's details
 export const updateAdoptionKid: ValidatedRequestHandler<
   UpdateAdoptionRequestSchema

@@ -216,9 +216,37 @@ export const signInUser = async (body: LoginRequestSchema["body"]) => {
     id: user.id,
     name: user.name,
     email: user.email,
+    role: user.role,
     accessToken: accessToken,
     refreshToken: refreshToken,
   };
+};
+
+export const refreshAccessToken = async (refreshToken: string) => {
+  const cachedUserId = await getCachedToken("refresh-token", refreshToken);
+  if (!cachedUserId) {
+    throw new AuthenticationError("Invalid or expired refresh token");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: cachedUserId } });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  await consumeCachedToken("refresh-token", refreshToken);
+
+  const newRefreshToken = authUtils.generateRandomToken();
+  await setCachedToken("refresh-token", {
+    token: newRefreshToken,
+    userId: user.id,
+  });
+
+  const accessToken = authUtils.createJWTToken({
+    userId: user.id,
+    role: user.role,
+  });
+
+  return { accessToken, refreshToken: newRefreshToken };
 };
 
 export const signOutUser = async (userId: string, refreshToken: string) => {

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as adoptionController from "@/features/adoption/adoption.controller";
 import { accessTokenValidator } from "@/common/middlewares/token.middleware";
+import { requireRole } from "@/common/middlewares/role.middleware";
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import {
   adoptionRequestIdSchema,
@@ -9,6 +10,7 @@ import {
   updateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
 import { upload } from "@/config/multer.config";
+import { Role } from "@/common/types/enums";
 
 const router = Router();
 
@@ -37,7 +39,6 @@ const router = Router();
  *               - name
  *               - surName
  *               - age
- *               - caste
  *               - gender
  *               - province
  *               - description
@@ -48,9 +49,6 @@ const router = Router();
  *                 type: string
  *               age:
  *                 type: number
- *               caste:
- *                 type: string
- *                 enum: [Brahmin, Kshatriya, Vaishya, Sudra]
  *               gender:
  *                 type: string
  *                 enum: [Male, Female, Other]
@@ -89,11 +87,6 @@ router.post(
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: caste
- *         schema:
- *           type: string
- *           enum: [Brahmin, Kshatriya, Vaishya, Sudra]
- *       - in: query
  *         name: minAge
  *         schema:
  *           type: integer
@@ -117,6 +110,49 @@ router.get(
   accessTokenValidator,
   validationMiddleware(fetchAdoptionRequestsSchema),
   adoptionController.fetchAllKids
+);
+
+/**
+ * @swagger
+ * /adoption/requests/me:
+ *   get:
+ *     summary: Fetch the current user's own adoption requests
+ *     tags: [Adoption]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of the current user's adoption requests
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/requests/me",
+  accessTokenValidator,
+  adoptionController.fetchMyAdoptionRequests
+);
+
+/**
+ * @swagger
+ * /adoption/requests/pending:
+ *   get:
+ *     summary: Fetch all pending adoption requests (ADMIN only)
+ *     tags: [Adoption]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending adoption requests
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden — ADMIN role required
+ */
+router.get(
+  "/requests/pending",
+  accessTokenValidator,
+  requireRole(Role.ADMIN),
+  adoptionController.fetchPendingAdoptionRequests
 );
 
 /**
@@ -149,12 +185,19 @@ router.get(
 
 /**
  * @swagger
- * /adoption:
+ * /adoption/{id}:
  *   patch:
  *     summary: Update a child's record
  *     tags: [Adoption]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Child ID
  *     requestBody:
  *       required: true
  *       content:
@@ -168,8 +211,6 @@ router.get(
  *                 type: string
  *               age:
  *                 type: number
- *               caste:
- *                 type: string
  *               gender:
  *                 type: string
  *               province:
@@ -186,7 +227,7 @@ router.get(
  *         description: Validation error
  */
 router.patch(
-  "/",
+  "/:id",
   accessTokenValidator,
   upload.single("image"),
   validationMiddleware(updateAdoptionRequestSchema),
