@@ -2,6 +2,8 @@
 import LogoIcon from "@/components/icons/LogoIcon";
 import { Button } from "@/components/ui/button";
 import useThemeStore from "@/hooks/useThemeStore";
+import { useAuthStore } from "@/store/auth-store";
+import { api } from "@/lib/api";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,6 +13,19 @@ export default function NavigationBar() {
   const navigate = useNavigate();
   const { theme, setTheme } = useThemeStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
+
+  const handleSignOut = async () => {
+    try {
+      await api.post("/auth/signout");
+    } catch {
+      // best-effort: proceed with local logout regardless
+    } finally {
+      logout();
+      navigate({ to: "/" });
+    }
+  };
 
   const links = [
     {
@@ -58,13 +73,32 @@ export default function NavigationBar() {
             {link.label}
           </Link>
         ))}
-        <Button
-          variant={"outline"}
-          className="ml-4 hover:cursor-pointer rounded-full px-6"
-          onClick={() => navigate({ to: "/sign-in" })}
-        >
-          Sign In / Register
-        </Button>
+        {isAuthenticated ? (
+          <div className="ml-4 flex items-center gap-3">
+            <Link
+              to="/dashboard"
+              className="hover:text-brand transition-colors text-text-muted"
+              activeProps={{ className: "!text-brand font-bold" }}
+            >
+              Dashboard
+            </Link>
+            <Button
+              variant={"outline"}
+              className="hover:cursor-pointer rounded-full px-6"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant={"outline"}
+            className="ml-4 hover:cursor-pointer rounded-full px-6"
+            onClick={() => navigate({ to: "/sign-in" })}
+          >
+            Sign In / Register
+          </Button>
+        )}
       </nav>
 
       {/* Desktop Theme Toggle */}
@@ -123,15 +157,37 @@ export default function NavigationBar() {
                 {link.label}
               </Link>
             ))}
-            <Button
-              className="w-full mt-2 rounded-full"
-              onClick={() => {
-                navigate({ to: "/sign-in" });
-                setIsMenuOpen(false);
-              }}
-            >
-              Sign In / Register
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="text-lg font-medium text-text-dark hover:text-brand py-2 border-b border-border/50"
+                  activeProps={{ className: "!text-brand font-bold" }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Button
+                  className="w-full mt-2 rounded-full"
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button
+                className="w-full mt-2 rounded-full"
+                onClick={() => {
+                  navigate({ to: "/sign-in" });
+                  setIsMenuOpen(false);
+                }}
+              >
+                Sign In / Register
+              </Button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

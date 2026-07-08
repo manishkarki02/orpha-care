@@ -61,11 +61,11 @@ export const SignInForm = () => {
     setIsLoading(true);
     try {
       const response = await api.post("/auth/signin", data);
-      const { id, name, email, accessToken, refreshToken } = response.data.data;
-      
+      const { id, name, email, role, accessToken, refreshToken } = response.data.data;
+
       login(
-          { id: id, name: name, email: email, role: "USER" },
-          accessToken, 
+          { id: id, name: name, email: email, role: role },
+          accessToken,
           refreshToken
       );
       

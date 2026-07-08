@@ -1,7 +1,8 @@
-
 import { createFileRoute } from "@tanstack/react-router";
 import ReportDetails from "@/features/reports/components/ReportDetails";
-import { REPORTS_DATA } from "@/features/reports/data";
+import ReportDetailsSkeleton from "@/features/reports/components/ReportDetailsSkeleton";
+import useCustomQuery from "@/hooks/useCustomQuery";
+import { fetchReportById } from "@/features/reports/api";
 
 export const Route = createFileRoute("/reports/$reportId")({
   component: ReportDetailsPage,
@@ -9,12 +10,18 @@ export const Route = createFileRoute("/reports/$reportId")({
 
 function ReportDetailsPage() {
   const { reportId } = Route.useParams();
-  const report = REPORTS_DATA.find((r) => r.id === reportId);
+  const { data: report, isLoading, isError } = useCustomQuery({
+    key: ["reports", reportId],
+    queryFn: () => fetchReportById(reportId),
+  });
 
-  if (!report) {
+  if (isLoading) {
+    return <ReportDetailsSkeleton />;
+  }
+
+  if (isError || !report) {
     return <div className="p-12 text-center text-xl">Report not found</div>;
   }
 
-  return <ReportDetails {...report} />;
+  return <ReportDetails report={report} />;
 }
-

@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ChildCard from "./ChildCard";
 import ChildCardSkeleton from "./ChildCardSkeleton";
 import { cn } from "@/lib/utils";
-import { CHILDREN_DATA } from "@/features/children/data";
+import useCustomQuery from "@/hooks/useCustomQuery";
+import { fetchChildren } from "@/features/children/api";
+import { PROVINCES } from "@/features/children/types";
 
-const LOCATIONS = ["All", "Gauteng", "Western Cape", "KwaZulu-Natal", "Limpopo"];
+const FILTERS = ["All", ...PROVINCES] as const;
 
 export default function ChildrenGrid() {
-  const [activeLocation, setActiveLocation] = useState("All");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const [activeProvince, setActiveProvince] = useState<string>("All");
+  const { data: children, isLoading } = useCustomQuery({
+    key: ["adoptions"],
+    queryFn: fetchChildren,
+  });
 
   const filteredChildren =
-    activeLocation === "All"
-      ? CHILDREN_DATA
-      : CHILDREN_DATA.filter((child) => child.location === activeLocation); // Simple strict match for now
+    activeProvince === "All"
+      ? (children ?? [])
+      : (children ?? []).filter((child) => child.province === activeProvince);
 
   return (
     <section className="py-12 md:py-20 px-6 max-w-[1400px] mx-auto" id="children-grid">
@@ -34,18 +34,18 @@ export default function ChildrenGrid() {
 
         {/* Filter Tabs */}
         <div className="flex flex-wrap gap-2">
-          {LOCATIONS.map((loc) => (
+          {FILTERS.map((province) => (
             <button
-              key={loc}
-              onClick={() => setActiveLocation(loc)}
+              key={province}
+              onClick={() => setActiveProvince(province)}
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-all",
-                activeLocation === loc
+                activeProvince === province
                   ? "bg-text-dark text-white shadow-lg scale-105"
                   : "bg-white text-text-muted hover:bg-gray-100 border border-border"
               )}
             >
-              {loc}
+              {province}
             </button>
           ))}
         </div>
@@ -57,10 +57,15 @@ export default function ChildrenGrid() {
               <ChildCardSkeleton key={i} />
             ))
           : filteredChildren.map((child) => (
-              <ChildCard key={child.id} {...child} />
+              <ChildCard key={child.id} child={child} />
             ))}
       </div>
+
+      {!isLoading && filteredChildren.length === 0 && (
+        <p className="text-center text-text-muted py-12">
+          No children found for this province.
+        </p>
+      )}
     </section>
   );
 }
-

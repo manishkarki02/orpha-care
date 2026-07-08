@@ -13,12 +13,7 @@ export const ProtectedRoute = ({ allowedRoles, children }: ProtectedRouteProps) 
   const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
-    // If using Tanstack Router's navigate, we might need a different approach, 
-    // but <Navigate> component is standard in many routers. 
-    // Wait, Tanstack Router uses `Navigate` component too?
-    // Let's assume standard behavior or check imports.
-    // Tanstack router has `Navigate`.
-    return <Navigate to="/signin" />;
+    return <Navigate to="/sign-in" />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {

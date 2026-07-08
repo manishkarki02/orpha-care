@@ -1,20 +1,18 @@
+import { PLACEHOLDER_AVATAR } from "@/lib/utils";
+import type { Volunteer } from "@/features/volunteers/types";
 
 interface VolunteerCardProps {
-  name: string;
-  age: number;
-  imageUrl: string;
+  volunteer: Volunteer;
 }
 
-export default function VolunteerCard({
-  name,
-  age,
-  imageUrl,
-}: VolunteerCardProps) {
+export default function VolunteerCard({ volunteer }: VolunteerCardProps) {
+  const { name, age, picture } = volunteer;
+
   return (
     <div className="bg-white dark:bg-bg-card rounded-[20px] overflow-hidden shadow-sm border border-border flex flex-col items-center">
       <div className="w-full aspect-[4/4] overflow-hidden bg-gray-100">
         <img
-          src={imageUrl}
+          src={picture ?? PLACEHOLDER_AVATAR}
           alt={name}
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
         />

@@ -1,20 +1,18 @@
 import VolunteerCard from "@/features/volunteers/components/VolunteerCard";
 import VolunteerCardSkeleton from "@/features/volunteers/components/VolunteerCardSkeleton";
-import { VOLUNTEERS_DATA } from "@/features/volunteers/data";
+import { fetchVolunteers } from "@/features/volunteers/api";
+import useCustomQuery from "@/hooks/useCustomQuery";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/(features)/volunteers")({
   component: VolunteersPage,
 });
 
 function VolunteersPage() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: volunteers, isLoading } = useCustomQuery({
+    key: ["volunteers"],
+    queryFn: fetchVolunteers,
+  });
 
   return (
     <div className="py-12 px-6 max-w-[1200px] mx-auto">
@@ -34,8 +32,8 @@ function VolunteersPage() {
           ? Array.from({ length: 6 }).map((_, i) => (
               <VolunteerCardSkeleton key={i} />
             ))
-          : VOLUNTEERS_DATA.map((volunteer) => (
-              <VolunteerCard key={volunteer.id} {...volunteer} />
+          : (volunteers ?? []).map((volunteer) => (
+              <VolunteerCard key={volunteer.id} volunteer={volunteer} />
             ))}
       </div>
     </div>

@@ -2,10 +2,11 @@
 import Modal from "@/common/components/Modal";
 import ReportCard from "@/features/reports/components/ReportCard";
 import ReportCardSkeleton from "@/features/reports/components/ReportCardSkeleton";
-import { REPORTS_DATA } from "@/features/reports/data";
+import { fetchReports } from "@/features/reports/api";
+import useCustomQuery from "@/hooks/useCustomQuery";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, MapPin, Plus, Upload, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/(features)/reports")({
@@ -14,12 +15,10 @@ export const Route = createFileRoute("/(features)/reports")({
 
 function ReportsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: reports, isLoading } = useCustomQuery({
+    key: ["reports"],
+    queryFn: fetchReports,
+  });
 
   return (
     <div className="py-12 px-6 max-w-[1400px] mx-auto min-h-screen">
@@ -46,8 +45,8 @@ function ReportsPage() {
           ? Array.from({ length: 8 }).map((_, i) => (
               <ReportCardSkeleton key={i} />
             ))
-          : REPORTS_DATA.map((report) => (
-              <ReportCard key={report.id} {...report} />
+          : (reports ?? []).map((report) => (
+              <ReportCard key={report.id} report={report} />
             ))}
       </div>
 

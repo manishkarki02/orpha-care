@@ -5,6 +5,7 @@ const API_URL = "http://localhost:8000/api"; // Simplify for now, ideally env va
 
 export const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -40,9 +41,11 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const response = await axios.post(`${API_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        const response = await axios.post(
+          `${API_URL}/auth/refresh`,
+          { refreshToken },
+          { withCredentials: true }
+        );
 
         const { accessToken, refreshToken: newRefreshToken } =
           response.data.data;
