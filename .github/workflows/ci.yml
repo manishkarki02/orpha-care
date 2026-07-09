@@ -13,9 +13,6 @@ jobs:
       run:
         working-directory: backend
     env:
-      # Dummy values so backend/src/config/env.config.ts's schema validation
-      # (and `prisma generate`, which needs DATABASE_URL just to parse config)
-      # succeed in CI. All service tests mock @/db and never hit a real database.
       API_URL: http://localhost:8000/api
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       FRONTEND_URL: http://localhost:5173
