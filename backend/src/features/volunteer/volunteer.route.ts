@@ -1,12 +1,12 @@
-import * as volunteerController from "@/features/volunteer/volunteer.controller";
-import { Router } from "express";
-import { validationMiddleware } from "@/common/middlewares/validator.middleware";
-import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { create } from "domain";
+import { Router } from "express";
+import { accessTokenValidator } from "@/common/middlewares/token.middleware";
+import { validationMiddleware } from "@/common/middlewares/validator.middleware";
+import * as volunteerController from "@/features/volunteer/volunteer.controller";
 import {
-  createVolunteerRequestSchema,
-  updateVolunteerRequestSchema,
-  volunteerRequestIdSchema,
+	createVolunteerRequestSchema,
+	updateVolunteerRequestSchema,
+	volunteerRequestIdSchema,
 } from "@/features/volunteer/volunteer.schema";
 
 const router = Router();
@@ -53,10 +53,10 @@ const router = Router();
  */
 
 router.post(
-  "/",
-  accessTokenValidator,
-  validationMiddleware(createVolunteerRequestSchema),
-  volunteerController.createVolunteer
+	"/",
+	accessTokenValidator,
+	validationMiddleware(createVolunteerRequestSchema),
+	volunteerController.createVolunteer,
 );
 
 /**
@@ -97,10 +97,10 @@ router.get("/", accessTokenValidator, volunteerController.fetchAllVolunteers);
  *         description: Volunteer not found
  */
 router.get(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(volunteerRequestIdSchema),
-  volunteerController.fetchVolunteerDetail
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(volunteerRequestIdSchema),
+	volunteerController.fetchVolunteerDetail,
 );
 
 /**
@@ -139,10 +139,10 @@ router.get(
  *         description: Validation error
  */
 router.post(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(updateVolunteerRequestSchema),
-  volunteerController.updateVolunteer
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(updateVolunteerRequestSchema),
+	volunteerController.updateVolunteer,
 );
 
 /**
@@ -167,10 +167,10 @@ router.post(
  *         description: Volunteer not found
  */
 router.delete(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(volunteerRequestIdSchema),
-  volunteerController.deleteVolunteer
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(volunteerRequestIdSchema),
+	volunteerController.deleteVolunteer,
 );
 
 export default router;

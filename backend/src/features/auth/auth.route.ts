@@ -1,16 +1,16 @@
-import { validationMiddleware } from "@/common/middlewares/validator.middleware";
-import {
-  loginRequestSchema,
-  refreshTokenRequestSchema,
-  registerRequestSchema,
-  resendVerificationRequestSchema,
-  resetPasswordRequestSchema,
-  verificationRequestSchema,
-} from "@/features/auth/auth.schema";
-import * as authController from "@/features/auth/auth.controller";
 import { Router } from "express";
-import { catchAsync } from "@/common/utils/error.utils";
 import { accessTokenValidator } from "@/common/middlewares/token.middleware";
+import { validationMiddleware } from "@/common/middlewares/validator.middleware";
+import { catchAsync } from "@/common/utils/error.utils";
+import * as authController from "@/features/auth/auth.controller";
+import {
+	loginRequestSchema,
+	refreshTokenRequestSchema,
+	registerRequestSchema,
+	resendVerificationRequestSchema,
+	resetPasswordRequestSchema,
+	verificationRequestSchema,
+} from "@/features/auth/auth.schema";
 
 const router = Router();
 
@@ -62,9 +62,9 @@ const router = Router();
  *         description: Internal server error
  */
 router.post(
-  "/signup",
-  validationMiddleware(registerRequestSchema),
-  catchAsync(authController.signUpUser)
+	"/signup",
+	validationMiddleware(registerRequestSchema),
+	catchAsync(authController.signUpUser),
 );
 
 /**
@@ -97,9 +97,9 @@ router.post(
  */
 
 router.post(
-  "/verify",
-  validationMiddleware(verificationRequestSchema),
-  catchAsync(authController.verifyUser)
+	"/verify",
+	validationMiddleware(verificationRequestSchema),
+	catchAsync(authController.verifyUser),
 );
 
 /**
@@ -126,9 +126,9 @@ router.post(
  *         description: Internal server error
  */
 router.get(
-  "/resend-verification",
-  validationMiddleware(resendVerificationRequestSchema),
-  catchAsync(authController.resendVerificationToken)
+	"/resend-verification",
+	validationMiddleware(resendVerificationRequestSchema),
+	catchAsync(authController.resendVerificationToken),
 );
 
 /**
@@ -172,9 +172,9 @@ router.get(
  *         description: Invalid credentials
  */
 router.post(
-  "/signin",
-  validationMiddleware(loginRequestSchema),
-  catchAsync(authController.loginUser)
+	"/signin",
+	validationMiddleware(loginRequestSchema),
+	catchAsync(authController.loginUser),
 );
 
 /**
@@ -215,9 +215,9 @@ router.post(
  *         description: Invalid or expired refresh token
  */
 router.post(
-  "/refresh",
-  validationMiddleware(refreshTokenRequestSchema),
-  catchAsync(authController.refreshAccessToken)
+	"/refresh",
+	validationMiddleware(refreshTokenRequestSchema),
+	catchAsync(authController.refreshAccessToken),
 );
 
 /**
@@ -234,11 +234,7 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.post(
-  "/signout",
-  accessTokenValidator,
-  catchAsync(authController.logoutUser)
-);
+router.post("/signout", accessTokenValidator, catchAsync(authController.logoutUser));
 
 /**
  * @swagger
@@ -264,9 +260,9 @@ router.post(
  *         description: Internal server error
  */
 router.get(
-  "/forget-password",
-  validationMiddleware(resendVerificationRequestSchema),
-  catchAsync(authController.forgetPassword)
+	"/forget-password",
+	validationMiddleware(resendVerificationRequestSchema),
+	catchAsync(authController.forgetPassword),
 );
 
 /**
@@ -309,9 +305,9 @@ router.get(
  *         description: Internal server error
  */
 router.post(
-  "/reset-password",
-  validationMiddleware(resetPasswordRequestSchema),
-  catchAsync(authController.resetPassword)
+	"/reset-password",
+	validationMiddleware(resetPasswordRequestSchema),
+	catchAsync(authController.resetPassword),
 );
 
 export default router;

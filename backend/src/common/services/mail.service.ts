@@ -1,13 +1,13 @@
-import transporter from "@/config/mail.config";
 import Environment from "@/config/env.config";
+import transporter from "@/config/mail.config";
 
 export const sendMail = async (email: string, childName: string) => {
-  try {
-    let info = await transporter.sendMail({
-      from: Environment.get("SMTP_FROM"),
-      to: email,
-      subject: "Adoption of a child",
-      html: `
+	try {
+		const info = await transporter.sendMail({
+			from: Environment.get("SMTP_FROM"),
+			to: email,
+			subject: "Adoption of a child",
+			html: `
         <div
           class="container"
           style="max-width: 90%; margin: auto; padding-top: 20px"
@@ -18,23 +18,23 @@ export const sendMail = async (email: string, childName: string) => {
 
      </div>
       `,
-    });
-    return info;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
+		});
+		return info;
+	} catch (error) {
+		console.log(error);
+		return false;
+	}
 };
 
 export const sendVerificationMail = async (email: string, token: string) => {
-  try {
-    const verificationLink = `${Environment.get("FRONTEND_URL")}/verify-email?token=${token}&email=${email}`;
+	try {
+		const verificationLink = `${Environment.get("FRONTEND_URL")}/verify-email?token=${token}&email=${email}`;
 
-    let info = await transporter.sendMail({
-      from: Environment.get("SMTP_FROM"),
-      to: email,
-      subject: "Verify your email address",
-      html: `
+		const info = await transporter.sendMail({
+			from: Environment.get("SMTP_FROM"),
+			to: email,
+			subject: "Verify your email address",
+			html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
           <h2 style="color: #333; text-align: center;">Welcome to OrphaCare</h2>
           <p style="color: #555; font-size: 16px;">
@@ -52,21 +52,21 @@ export const sendVerificationMail = async (email: string, token: string) => {
           </p>
         </div>
       `,
-    });
-    return info;
-  } catch (error) {
-    console.error("Error sending verification email:", error);
-    return false;
-  }
+		});
+		return info;
+	} catch (error) {
+		console.error("Error sending verification email:", error);
+		return false;
+	}
 };
 
 export const sendResetPasswordMail = async (email: string, resetLink: string) => {
-  try {
-    let info = await transporter.sendMail({
-      from: Environment.get("SMTP_FROM"),
-      to: email,
-      subject: "Reset Your Password",
-      html: `
+	try {
+		const info = await transporter.sendMail({
+			from: Environment.get("SMTP_FROM"),
+			to: email,
+			subject: "Reset Your Password",
+			html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
           <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
           <p style="color: #555; font-size: 16px;">
@@ -84,10 +84,10 @@ export const sendResetPasswordMail = async (email: string, resetLink: string) =>
           </p>
         </div>
       `,
-    });
-    return info;
-  } catch (error) {
-    console.error("Error sending reset password email:", error);
-    return false;
-  }
+		});
+		return info;
+	} catch (error) {
+		console.error("Error sending reset password email:", error);
+		return false;
+	}
 };

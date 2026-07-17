@@ -1,178 +1,174 @@
-import prisma from "@/db";
 import {
-  CreateDonationRequestSchema,
-  UpdateDonationRequestSchema,
+	AuthorizationError,
+	InternalServerError,
+	NotFoundError,
+} from "@/common/utils/errorClass.utils";
+import prisma from "@/db";
+import type {
+	CreateDonationRequestSchema,
+	UpdateDonationRequestSchema,
 } from "@/features/donation/donations.schema";
 import { DonationType } from "@/generated/prisma/enums";
-import {
-  AuthorizationError,
-  InternalServerError,
-  NotFoundError,
-} from "@/common/utils/errorClass.utils";
 
 // Create a donation
 export const createDonation = async (
-  body: CreateDonationRequestSchema["body"],
-  donorId: string
+	body: CreateDonationRequestSchema["body"],
+	donorId: string,
 ) => {
-  const data =
-    body.type === DonationType.Money
-      ? {
-          amount: body.amount,
-          type: body.type,
-          donorId,
-        }
-      : {
-          weight: body.weight,
-          type: body.type,
-          donorId,
-        };
+	const data =
+		body.type === DonationType.Money
+			? {
+					amount: body.amount,
+					type: body.type,
+					donorId,
+				}
+			: {
+					weight: body.weight,
+					type: body.type,
+					donorId,
+				};
 
-  const donation = await prisma.donation.create({
-    data: data as any,
-  });
+	const donation = await prisma.donation.create({
+		data: data as any,
+	});
 
-  if (!donation) {
-    throw new InternalServerError("Failed to create donation.");
-  }
+	if (!donation) {
+		throw new InternalServerError("Failed to create donation.");
+	}
 
-  return donation;
+	return donation;
 };
 
 // Fetch all donations
 export const fetchAllDonations = async () => {
-  const donations = await prisma.donation.findMany({
-    select: {
-      id: true,
-      weight: true,
-      amount: true,
-      type: true,
-      donor: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
+	const donations = await prisma.donation.findMany({
+		select: {
+			id: true,
+			weight: true,
+			amount: true,
+			type: true,
+			donor: {
+				select: {
+					name: true,
+				},
+			},
+		},
+	});
 
-  return donations;
+	return donations;
 };
 
 // Fetch donations made by myself
 export const fetchMyDonations = async (donorId: string) => {
-  const donations = await prisma.donation.findMany({
-    where: {
-      donorId,
-    },
-    select: {
-      id: true,
-      weight: true,
-      amount: true,
-      type: true,
-      donor: {
-        select: {
-          id: true,
-          name: true,
-          address: true,
-          email: true,
-          phone: true,
-        },
-      },
-    },
-  });
+	const donations = await prisma.donation.findMany({
+		where: {
+			donorId,
+		},
+		select: {
+			id: true,
+			weight: true,
+			amount: true,
+			type: true,
+			donor: {
+				select: {
+					id: true,
+					name: true,
+					address: true,
+					email: true,
+					phone: true,
+				},
+			},
+		},
+	});
 
-  return donations;
+	return donations;
 };
 
 // Fetch a single donation by id
 export const fetchDonationById = async (donationId: string) => {
-  const donationDetail = await prisma.donation.findUnique({
-    where: {
-      id: donationId,
-    },
-    select: {
-      id: true,
-      weight: true,
-      amount: true,
-      type: true,
-      donor: {
-        select: {
-          id: true,
-          name: true,
-          address: true,
-          email: true,
-          phone: true,
-        },
-      },
-    },
-  });
+	const donationDetail = await prisma.donation.findUnique({
+		where: {
+			id: donationId,
+		},
+		select: {
+			id: true,
+			weight: true,
+			amount: true,
+			type: true,
+			donor: {
+				select: {
+					id: true,
+					name: true,
+					address: true,
+					email: true,
+					phone: true,
+				},
+			},
+		},
+	});
 
-  if (!donationDetail) {
-    throw new NotFoundError("Donation not found.");
-  }
+	if (!donationDetail) {
+		throw new NotFoundError("Donation not found.");
+	}
 
-  return donationDetail;
+	return donationDetail;
 };
 
 // Update a donation
 export const updateDonation = async (
-  body: UpdateDonationRequestSchema["body"],
-  donationId: string,
-  donorId: string
+	body: UpdateDonationRequestSchema["body"],
+	donationId: string,
+	donorId: string,
 ) => {
-  const existingDonation = await prisma.donation.findUnique({
-    where: {
-      id: donationId,
-    },
-  });
+	const existingDonation = await prisma.donation.findUnique({
+		where: {
+			id: donationId,
+		},
+	});
 
-  if (!existingDonation) {
-    throw new NotFoundError("Donation not found.");
-  }
+	if (!existingDonation) {
+		throw new NotFoundError("Donation not found.");
+	}
 
-  if (existingDonation.donorId !== donorId) {
-    throw new AuthorizationError(
-      "You are not authorized to update this donation."
-    );
-  }
+	if (existingDonation.donorId !== donorId) {
+		throw new AuthorizationError("You are not authorized to update this donation.");
+	}
 
-  const updatedDonation = await prisma.donation.update({
-    where: {
-      id: donationId,
-    },
-    data: {
-      amount: body.amount ?? existingDonation.amount,
-      type: existingDonation.type,
-      donorId: existingDonation.donorId,
-      weight: existingDonation.weight,
-    },
-  });
+	const updatedDonation = await prisma.donation.update({
+		where: {
+			id: donationId,
+		},
+		data: {
+			amount: body.amount ?? existingDonation.amount,
+			type: existingDonation.type,
+			donorId: existingDonation.donorId,
+			weight: existingDonation.weight,
+		},
+	});
 
-  if (!updatedDonation) {
-    throw new InternalServerError("Failed to update donation.");
-  }
+	if (!updatedDonation) {
+		throw new InternalServerError("Failed to update donation.");
+	}
 
-  return updatedDonation;
+	return updatedDonation;
 };
 
 // Delete a donation
 export const deleteDonation = async (id: string, donorId: string) => {
-  const existingDonation = await prisma.donation.findUnique({
-    where: { id },
-  });
-  if (!existingDonation) {
-    throw new NotFoundError("Donation not found.");
-  }
+	const existingDonation = await prisma.donation.findUnique({
+		where: { id },
+	});
+	if (!existingDonation) {
+		throw new NotFoundError("Donation not found.");
+	}
 
-  if (existingDonation.donorId !== donorId) {
-    throw new AuthorizationError(
-      "You are not authorized to delete this donation."
-    );
-  }
+	if (existingDonation.donorId !== donorId) {
+		throw new AuthorizationError("You are not authorized to delete this donation.");
+	}
 
-  await prisma.donation.delete({
-    where: { id },
-  });
+	await prisma.donation.delete({
+		where: { id },
+	});
 
-  return;
+	return;
 };

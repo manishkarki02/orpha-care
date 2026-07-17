@@ -1,12 +1,12 @@
 import { Router } from "express";
-import * as reportController from "@/features/report/report.controller";
-import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import { accessTokenValidator } from "@/common/middlewares/token.middleware";
+import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import { upload } from "@/config/multer.config";
+import * as reportController from "@/features/report/report.controller";
 import {
-  createReportRequestSchema,
-  fetchReportDetailsRequestSchema,
-  updateReportRequestSchema,
+	createReportRequestSchema,
+	fetchReportDetailsRequestSchema,
+	updateReportRequestSchema,
 } from "@/features/report/report.schema";
 
 const router = Router();
@@ -67,11 +67,11 @@ const router = Router();
  *         description: Unauthorized
  */
 router.post(
-  "/",
-  accessTokenValidator,
-  upload.single("image"),
-  validationMiddleware(createReportRequestSchema),
-  reportController.createMissingReport
+	"/",
+	accessTokenValidator,
+	upload.single("image"),
+	validationMiddleware(createReportRequestSchema),
+	reportController.createMissingReport,
 );
 
 /**
@@ -128,10 +128,10 @@ router.get("/me", accessTokenValidator, reportController.fetchMyMissingReports);
  *         description: Report not found
  */
 router.get(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchReportDetailsRequestSchema),
-  reportController.fetchMissingReportDetails
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(fetchReportDetailsRequestSchema),
+	reportController.fetchMissingReportDetails,
 );
 
 /**
@@ -180,10 +180,10 @@ router.get(
  *         description: Validation error
  */
 router.patch(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(updateReportRequestSchema),
-  reportController.updateMissingReport
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(updateReportRequestSchema),
+	reportController.updateMissingReport,
 );
 
 /**
@@ -208,10 +208,10 @@ router.patch(
  *         description: Report not found
  */
 router.delete(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchReportDetailsRequestSchema),
-  reportController.deleteMissingReport
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(fetchReportDetailsRequestSchema),
+	reportController.deleteMissingReport,
 );
 
 export default router;

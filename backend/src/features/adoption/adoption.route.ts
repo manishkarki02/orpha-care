@@ -1,16 +1,16 @@
 import { Router } from "express";
-import * as adoptionController from "@/features/adoption/adoption.controller";
-import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { requireRole } from "@/common/middlewares/role.middleware";
+import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";
-import {
-  adoptionRequestIdSchema,
-  createAdoptionRequestSchema,
-  fetchAdoptionRequestsSchema,
-  updateAdoptionRequestSchema,
-} from "@/features/adoption/adoption.schema";
-import { upload } from "@/config/multer.config";
 import { Role } from "@/common/types/enums";
+import { upload } from "@/config/multer.config";
+import * as adoptionController from "@/features/adoption/adoption.controller";
+import {
+	adoptionRequestIdSchema,
+	createAdoptionRequestSchema,
+	fetchAdoptionRequestsSchema,
+	updateAdoptionRequestSchema,
+} from "@/features/adoption/adoption.schema";
 
 const router = Router();
 
@@ -70,11 +70,11 @@ const router = Router();
  */
 
 router.post(
-  "/",
-  accessTokenValidator,
-  upload.single("image"),
-  validationMiddleware(createAdoptionRequestSchema),
-  adoptionController.createAdoptionKid
+	"/",
+	accessTokenValidator,
+	upload.single("image"),
+	validationMiddleware(createAdoptionRequestSchema),
+	adoptionController.createAdoptionKid,
 );
 
 /**
@@ -106,10 +106,10 @@ router.post(
  *         description: Unauthorized
  */
 router.get(
-  "/",
-  accessTokenValidator,
-  validationMiddleware(fetchAdoptionRequestsSchema),
-  adoptionController.fetchAllKids
+	"/",
+	accessTokenValidator,
+	validationMiddleware(fetchAdoptionRequestsSchema),
+	adoptionController.fetchAllKids,
 );
 
 /**
@@ -126,11 +126,7 @@ router.get(
  *       401:
  *         description: Unauthorized
  */
-router.get(
-  "/requests/me",
-  accessTokenValidator,
-  adoptionController.fetchMyAdoptionRequests
-);
+router.get("/requests/me", accessTokenValidator, adoptionController.fetchMyAdoptionRequests);
 
 /**
  * @swagger
@@ -149,10 +145,10 @@ router.get(
  *         description: Forbidden — ADMIN role required
  */
 router.get(
-  "/requests/pending",
-  accessTokenValidator,
-  requireRole(Role.ADMIN),
-  adoptionController.fetchPendingAdoptionRequests
+	"/requests/pending",
+	accessTokenValidator,
+	requireRole(Role.ADMIN),
+	adoptionController.fetchPendingAdoptionRequests,
 );
 
 /**
@@ -177,10 +173,10 @@ router.get(
  *         description: Child not found
  */
 router.get(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(adoptionRequestIdSchema),
-  adoptionController.fetchAdoptionKidDetails
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(adoptionRequestIdSchema),
+	adoptionController.fetchAdoptionKidDetails,
 );
 
 /**
@@ -227,11 +223,11 @@ router.get(
  *         description: Validation error
  */
 router.patch(
-  "/:id",
-  accessTokenValidator,
-  upload.single("image"),
-  validationMiddleware(updateAdoptionRequestSchema),
-  adoptionController.updateAdoptionKid
+	"/:id",
+	accessTokenValidator,
+	upload.single("image"),
+	validationMiddleware(updateAdoptionRequestSchema),
+	adoptionController.updateAdoptionKid,
 );
 
 /**
@@ -256,10 +252,10 @@ router.patch(
  *         description: Child not found
  */
 router.delete(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(adoptionRequestIdSchema),
-  adoptionController.deleteAdoptionKid
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(adoptionRequestIdSchema),
+	adoptionController.deleteAdoptionKid,
 );
 
 /**
@@ -284,10 +280,10 @@ router.delete(
  *         description: Bad request
  */
 router.post(
-  "/request/:id",
-  accessTokenValidator,
-  validationMiddleware(adoptionRequestIdSchema),
-  adoptionController.requestForAdoption
+	"/request/:id",
+	accessTokenValidator,
+	validationMiddleware(adoptionRequestIdSchema),
+	adoptionController.requestForAdoption,
 );
 
 export default router;
