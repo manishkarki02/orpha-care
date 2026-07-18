@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,8 +8,9 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
-  USER
+  Admin
+  Volunteer
+  User
 }
 
 enum Province {
@@ -35,62 +36,82 @@ enum DonationType {
   Money
 }
 
-model User {
-  id            String            @id @default(uuid())
-  name          String
-  address       String
-  email         String            @unique
-  phone         String            @unique
-  password      String
-  isVerified    Boolean           @default(false)
-  createdAt     DateTime          @default(now())
-  missingReport MissingReport[]
-  donation      Donation[]
-  role          Role
-  adoptedKid    KidsForAdoption[]
-  adoptionReq   AdoptionRequest[]
-
-  @@map("user") // map table name to lowercase
+enum AdoptionRequestStatus {
+  pending
+  under_review
+  approved
+  rejected
 }
 
-model MissingReport {
+model Users {
+  id            String             @id @default(uuid())
+  name          String
+  address       String
+  email         String
+  phone         String
+  password      String
+  isVerified    Boolean            @default(false)
+  missingReport MissingReports[]
+  donation      Donations[]
+  role          Role
+  adoptedKid    KidsForAdoptions[]
+  adoptionReq   AdoptionRequests[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  missingReports MissingReports[]
+
+  @@unique([email, phone])
+  @@map("users") // map table name to lowercase
+}
+
+model MissingReports {
   id              String   @id @default(uuid())
   name            String?
   lastSeenAddress String
   lastSeenTime    DateTime
   age             Int
   remarks         String?
-  longitude       Int
-  latitude        Int
+  longitude       Decimal
+  latitude        Decimal
   image           String?
   reporterId      String
-  reporter        User     @relation(fields: [reporterId], references: [id])
+  reporter        Users    @relation("reporter_id", fields: [reporterId], references: [id])
 
-  @@map("missing_report")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+
+  creator Users @relation(fields: [createdBy], references: [id])
+
+  @@map("missing_reports")
 }
 
-model Donation {
+model Donations {
   id      String       @id @default(uuid())
-  weight  Decimal?     @db.Decimal(10,2)
-  amount  Decimal?     @db.Decimal(10,2)
+  weight  Decimal?     @db.Decimal(10, 2)
+  amount  Decimal?     @db.Decimal(10, 2)
   type    DonationType
   donorId String
-  donor   User         @relation(fields: [donorId], references: [id])
+  donor   Users        @relation(fields: [donorId], references: [id])
 
-  @@map("donation")
+  @@map("donations")
 }
 
-model Volunteer {
+model Volunteers {
   id      String  @id @default(uuid())
   name    String
   age     Int
   picture String?
 
-  @@map("volunteer")
+  @@map("volunteers")
 }
 
-model KidsForAdoption {
-  id          String            @id @default(uuid())
+model KidsForAdoptions {
+  id          String             @id @default(uuid())
   picture     String?
   name        String
   surname     String
@@ -98,20 +119,20 @@ model KidsForAdoption {
   gender      Gender
   province    Province
   description String
-  adoptionReq AdoptionRequest[]
-  isAdopted   Boolean           @default(false)
+  adoptionReq AdoptionRequests[]
+  isAdopted   Boolean            @default(false)
   adopterId   String?
-  adopter     User?             @relation(fields: [adopterId], references: [id])
+  adopter     Users?             @relation(fields: [adopterId], references: [id])
 
-  @@map("kids_for_adoption")
+  @@map("kids_for_adoptions")
 }
 
-model AdoptionRequest {
+model AdoptionRequests {
   kidId     String
-  kid       KidsForAdoption @relation(fields: [kidId], references: [id])
+  kid       KidsForAdoptions @relation(fields: [kidId], references: [id])
   adopterId String
-  adopter   User            @relation(fields: [adopterId], references: [id])
+  adopter   Users            @relation(fields: [adopterId], references: [id])
 
   @@id([kidId, adopterId])
-  @@map("adoption_request")
+  @@map("adoption_requests")
 }

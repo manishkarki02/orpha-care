@@ -1,4 +1,3 @@
-import { create } from "domain";
 import { Router } from "express";
 import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";

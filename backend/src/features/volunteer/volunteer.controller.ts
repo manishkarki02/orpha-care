@@ -21,7 +21,7 @@ export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSche
 	});
 };
 
-export const fetchAllVolunteers: ValidatedRequestHandler = async (req, res) => {
+export const fetchAllVolunteers: ValidatedRequestHandler = async (_req, res) => {
 	const volunteers = await volunteerService.fetchAllVolunteers();
 
 	return ApiResponse.success(res, {
