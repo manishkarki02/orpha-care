@@ -44,48 +44,50 @@ enum AdoptionRequestStatus {
 }
 
 model Users {
-  id            String             @id @default(uuid())
-  name          String
-  address       String
-  email         String
-  phone         String
-  password      String
-  isVerified    Boolean            @default(false)
-  missingReport MissingReports[]
-  donation      Donations[]
-  role          Role
-  adoptedKid    KidsForAdoptions[]
-  adoptionReq   AdoptionRequests[]
+  id         String  @id @default(uuid())
+  name       String
+  email      String  @unique
+  phone      String  @unique
+  password   String
+  address    String
+  isVerified Boolean @default(false) @map("is_verified")
+  role       Role    @default(User)
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  deletedAt      DateTime?
-  missingReports MissingReports[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  @@unique([email, phone])
+  donation             Donations[]
+  adoptedKid           KidsForAdoptions[]
+  adoptionReq          AdoptionRequests[]
+  missingReports       MissingReports[]   @relation("reportedBy")
+  createdMissingReport MissingReports[]   @relation("missingReportCreatedBy")
+  updatedMissingReport MissingReports[]   @relation("missingReportUpdatedBy")
+
   @@map("users") // map table name to lowercase
 }
 
 model MissingReports {
   id              String   @id @default(uuid())
   name            String?
-  lastSeenAddress String
-  lastSeenTime    DateTime
+  lastSeenAddress String   @map("last_seen_address")
+  lastSeenTime    DateTime @map("last_seen_time")
   age             Int
   remarks         String?
-  longitude       Decimal
-  latitude        Decimal
+  longitude       Float
+  latitude        Float
   image           String?
-  reporterId      String
-  reporter        Users    @relation("reporter_id", fields: [reporterId], references: [id])
+  reporterId      String   @map("reporter_id")
+  reporter        Users    @relation("reportedBy", fields: [reporterId], references: [id])
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
 
-  creator Users @relation(fields: [createdBy], references: [id])
+  createdBy String? @map("created_by")
+  creator   Users?  @relation("missingReportCreatedBy", fields: [createdBy], references: [id])
+  updatedBy String? @map("updated_by")
+  updater   Users?  @relation("missingReportUpdatedBy", fields: [updatedBy], references: [id])
 
   @@map("missing_reports")
 }
