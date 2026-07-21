@@ -9,7 +9,10 @@ const amountSchema = z
 	.min(1, "Amount must be at least 1")
 	.max(1000000, "Amount must be at most 1,000,000");
 
-const weightSchema = z.number("Weight must be a number").min(0.1, "Weight must be at least 0.1 kg");
+const weightSchema = z
+	.number("Weight must be a number")
+	.min(0.1, "Weight must be at least 0.1 kg")
+	.max(150, "Weight cannot be more than 150 kg");
 
 // Request Schemas
 export const createDonationRequestSchema = z.object({
@@ -43,10 +46,17 @@ export const updateDonationRequestSchema = z.object({
 	}),
 	body: z
 		.object({
-			type: typeSchema,
-			weight: weightSchema,
+			type: typeSchema.optional(),
+			weight: weightSchema.optional(),
 		})
-		.refine((data) => data.type !== DonationType.Money, "Donation amount cannot be updated."),
+		.refine(
+			(data) => data.type !== DonationType.Money,
+			"Donation of monetary type cannot be changed.",
+		)
+		.refine(
+			(data) => data.type !== undefined || data.weight !== undefined,
+			"Either type or weight should be changed.",
+		),
 });
 
 export const fetchDonationDetailRequestSchema = z.object({
