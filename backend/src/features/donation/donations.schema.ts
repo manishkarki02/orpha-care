@@ -2,7 +2,7 @@ import z from "zod/v4";
 import { DonationType } from "@/generated/prisma/enums";
 
 // Field Schemas
-const typeSchema = z.enum(["amount", "item"]);
+const typeSchema = z.enum(DonationType, "Invalid Donation Type");
 
 const amountSchema = z
 	.number("Amount must be a number")
@@ -11,8 +11,6 @@ const amountSchema = z
 
 const weightSchema = z.number("Weight must be a number").min(0.1, "Weight must be at least 0.1 kg");
 
-const donationTypeSchema = z.enum(Object.values(DonationType), "Invalid donation type");
-
 // Request Schemas
 export const createDonationRequestSchema = z.object({
 	body: z
@@ -20,7 +18,7 @@ export const createDonationRequestSchema = z.object({
 			{
 				amount: amountSchema.optional(),
 				weight: weightSchema.optional(),
-				type: donationTypeSchema.optional(),
+				type: typeSchema,
 			},
 			"Request Body is required",
 		)
@@ -43,10 +41,15 @@ export const updateDonationRequestSchema = z.object({
 	params: z.object({
 		id: z.uuidv4("Invalid donation ID"),
 	}),
-	body: createDonationRequestSchema.shape.body.partial(),
+	body: z
+		.object({
+			type: typeSchema,
+			weight: weightSchema,
+		})
+		.refine((data) => data.type !== DonationType.Money, "Donation amount cannot be updated."),
 });
 
-export const getDonationRequestSchema = z.object({
+export const fetchDonationDetailRequestSchema = z.object({
 	params: z.object({
 		id: z.uuidv4("Invalid donation ID"),
 	}),
@@ -54,4 +57,4 @@ export const getDonationRequestSchema = z.object({
 
 export type CreateDonationRequestSchema = z.infer<typeof createDonationRequestSchema>;
 export type UpdateDonationRequestSchema = z.infer<typeof updateDonationRequestSchema>;
-export type GetDonationRequestSchema = z.infer<typeof getDonationRequestSchema>;
+export type FetchDonationDetailRequestSchema = z.infer<typeof fetchDonationDetailRequestSchema>;

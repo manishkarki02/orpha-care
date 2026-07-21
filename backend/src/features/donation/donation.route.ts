@@ -4,9 +4,9 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import * as donationController from "@/features/donation/donation.controller";
 import {
 	createDonationRequestSchema,
-	getDonationRequestSchema,
+	fetchDonationDetailRequestSchema,
 	updateDonationRequestSchema,
-} from "@/features/donation/donation.schema";
+} from "./donations.schema";
 
 const router = Router();
 
@@ -71,7 +71,7 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.get("/", accessTokenValidator, donationController.fetchAllDonation);
+router.get("/", accessTokenValidator, donationController.fetchDonations);
 
 /**
  * @swagger
@@ -87,7 +87,7 @@ router.get("/", accessTokenValidator, donationController.fetchAllDonation);
  *       401:
  *         description: Unauthorized
  */
-router.get("/me", accessTokenValidator, donationController.fetchMyDonation);
+router.get("/me", accessTokenValidator, donationController.fetchMyDonations);
 
 /**
  * @swagger
@@ -113,7 +113,7 @@ router.get("/me", accessTokenValidator, donationController.fetchMyDonation);
 router.get(
 	"/:id",
 	accessTokenValidator,
-	validationMiddleware(getDonationRequestSchema),
+	validationMiddleware(fetchDonationDetailRequestSchema),
 	donationController.fetchDonationDetails,
 );
 
@@ -183,7 +183,7 @@ router.post(
 router.delete(
 	"/:id",
 	accessTokenValidator,
-	validationMiddleware(getDonationRequestSchema),
+	validationMiddleware(fetchDonationDetailRequestSchema),
 	donationController.deleteDonation,
 );
 
