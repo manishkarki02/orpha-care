@@ -8,290 +8,290 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ReportsReportIdRouteImport } from './routes/reports.$reportId'
-import { Route as ChildrenChildIdRouteImport } from './routes/children.$childId'
-import { Route as featuresVolunteersRouteImport } from './routes/(features)/volunteers'
-import { Route as featuresReportsRouteImport } from './routes/(features)/reports'
-import { Route as featuresDonationsRouteImport } from './routes/(features)/donations'
-import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
-import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
-import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
-import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as VerifyEmailRouteImport } from "./routes/verify-email";
+import { Route as DashboardRouteImport } from "./routes/dashboard";
+import { Route as AboutRouteImport } from "./routes/about";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ReportsReportIdRouteImport } from "./routes/reports.$reportId";
+import { Route as ChildrenChildIdRouteImport } from "./routes/children.$childId";
+import { Route as featuresVolunteersRouteImport } from "./routes/(features)/volunteers";
+import { Route as featuresReportsRouteImport } from "./routes/(features)/reports";
+import { Route as featuresDonationRouteImport } from "./routes/(features)/donation";
+import { Route as authSignUpRouteImport } from "./routes/(auth)/sign-up";
+import { Route as authSignInRouteImport } from "./routes/(auth)/sign-in";
+import { Route as authResetPasswordRouteImport } from "./routes/(auth)/reset-password";
+import { Route as authForgotPasswordRouteImport } from "./routes/(auth)/forgot-password";
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
+  id: "/verify-email",
+  path: "/verify-email",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+  id: "/about",
+  path: "/about",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ReportsReportIdRoute = ReportsReportIdRouteImport.update({
-  id: '/reports/$reportId',
-  path: '/reports/$reportId',
+  id: "/reports/$reportId",
+  path: "/reports/$reportId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ChildrenChildIdRoute = ChildrenChildIdRouteImport.update({
-  id: '/children/$childId',
-  path: '/children/$childId',
+  id: "/children/$childId",
+  path: "/children/$childId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const featuresVolunteersRoute = featuresVolunteersRouteImport.update({
-  id: '/(features)/volunteers',
-  path: '/volunteers',
+  id: "/(features)/volunteers",
+  path: "/volunteers",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const featuresReportsRoute = featuresReportsRouteImport.update({
-  id: '/(features)/reports',
-  path: '/reports',
+  id: "/(features)/reports",
+  path: "/reports",
   getParentRoute: () => rootRouteImport,
-} as any)
-const featuresDonationsRoute = featuresDonationsRouteImport.update({
-  id: '/(features)/donations',
-  path: '/donations',
+} as any);
+const featuresDonationRoute = featuresDonationRouteImport.update({
+  id: "/(features)/donation",
+  path: "/donation",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authSignUpRoute = authSignUpRouteImport.update({
-  id: '/(auth)/sign-up',
-  path: '/sign-up',
+  id: "/(auth)/sign-up",
+  path: "/sign-up",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authSignInRoute = authSignInRouteImport.update({
-  id: '/(auth)/sign-in',
-  path: '/sign-in',
+  id: "/(auth)/sign-in",
+  path: "/sign-in",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authResetPasswordRoute = authResetPasswordRouteImport.update({
-  id: '/(auth)/reset-password',
-  path: '/reset-password',
+  id: "/(auth)/reset-password",
+  path: "/reset-password",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/(auth)/forgot-password',
-  path: '/forgot-password',
+  id: "/(auth)/forgot-password",
+  path: "/forgot-password",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRoute
-  '/verify-email': typeof VerifyEmailRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/sign-in': typeof authSignInRoute
-  '/sign-up': typeof authSignUpRoute
-  '/donations': typeof featuresDonationsRoute
-  '/reports': typeof featuresReportsRoute
-  '/volunteers': typeof featuresVolunteersRoute
-  '/children/$childId': typeof ChildrenChildIdRoute
-  '/reports/$reportId': typeof ReportsReportIdRoute
+  "/": typeof IndexRoute;
+  "/about": typeof AboutRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/verify-email": typeof VerifyEmailRoute;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/sign-in": typeof authSignInRoute;
+  "/sign-up": typeof authSignUpRoute;
+  "/donation": typeof featuresDonationRoute;
+  "/reports": typeof featuresReportsRoute;
+  "/volunteers": typeof featuresVolunteersRoute;
+  "/children/$childId": typeof ChildrenChildIdRoute;
+  "/reports/$reportId": typeof ReportsReportIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRoute
-  '/verify-email': typeof VerifyEmailRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/sign-in': typeof authSignInRoute
-  '/sign-up': typeof authSignUpRoute
-  '/donations': typeof featuresDonationsRoute
-  '/reports': typeof featuresReportsRoute
-  '/volunteers': typeof featuresVolunteersRoute
-  '/children/$childId': typeof ChildrenChildIdRoute
-  '/reports/$reportId': typeof ReportsReportIdRoute
+  "/": typeof IndexRoute;
+  "/about": typeof AboutRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/verify-email": typeof VerifyEmailRoute;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/sign-in": typeof authSignInRoute;
+  "/sign-up": typeof authSignUpRoute;
+  "/donation": typeof featuresDonationRoute;
+  "/reports": typeof featuresReportsRoute;
+  "/volunteers": typeof featuresVolunteersRoute;
+  "/children/$childId": typeof ChildrenChildIdRoute;
+  "/reports/$reportId": typeof ReportsReportIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRoute
-  '/verify-email': typeof VerifyEmailRoute
-  '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/reset-password': typeof authResetPasswordRoute
-  '/(auth)/sign-in': typeof authSignInRoute
-  '/(auth)/sign-up': typeof authSignUpRoute
-  '/(features)/donations': typeof featuresDonationsRoute
-  '/(features)/reports': typeof featuresReportsRoute
-  '/(features)/volunteers': typeof featuresVolunteersRoute
-  '/children/$childId': typeof ChildrenChildIdRoute
-  '/reports/$reportId': typeof ReportsReportIdRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/about": typeof AboutRoute;
+  "/dashboard": typeof DashboardRoute;
+  "/verify-email": typeof VerifyEmailRoute;
+  "/(auth)/forgot-password": typeof authForgotPasswordRoute;
+  "/(auth)/reset-password": typeof authResetPasswordRoute;
+  "/(auth)/sign-in": typeof authSignInRoute;
+  "/(auth)/sign-up": typeof authSignUpRoute;
+  "/(features)/donation": typeof featuresDonationRoute;
+  "/(features)/reports": typeof featuresReportsRoute;
+  "/(features)/volunteers": typeof featuresVolunteersRoute;
+  "/children/$childId": typeof ChildrenChildIdRoute;
+  "/reports/$reportId": typeof ReportsReportIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/about'
-    | '/dashboard'
-    | '/verify-email'
-    | '/forgot-password'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
-    | '/donations'
-    | '/reports'
-    | '/volunteers'
-    | '/children/$childId'
-    | '/reports/$reportId'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/about"
+    | "/dashboard"
+    | "/verify-email"
+    | "/forgot-password"
+    | "/reset-password"
+    | "/sign-in"
+    | "/sign-up"
+    | "/donation"
+    | "/reports"
+    | "/volunteers"
+    | "/children/$childId"
+    | "/reports/$reportId";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/about'
-    | '/dashboard'
-    | '/verify-email'
-    | '/forgot-password'
-    | '/reset-password'
-    | '/sign-in'
-    | '/sign-up'
-    | '/donations'
-    | '/reports'
-    | '/volunteers'
-    | '/children/$childId'
-    | '/reports/$reportId'
+    | "/"
+    | "/about"
+    | "/dashboard"
+    | "/verify-email"
+    | "/forgot-password"
+    | "/reset-password"
+    | "/sign-in"
+    | "/sign-up"
+    | "/donation"
+    | "/reports"
+    | "/volunteers"
+    | "/children/$childId"
+    | "/reports/$reportId";
   id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/dashboard'
-    | '/verify-email'
-    | '/(auth)/forgot-password'
-    | '/(auth)/reset-password'
-    | '/(auth)/sign-in'
-    | '/(auth)/sign-up'
-    | '/(features)/donations'
-    | '/(features)/reports'
-    | '/(features)/volunteers'
-    | '/children/$childId'
-    | '/reports/$reportId'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/about"
+    | "/dashboard"
+    | "/verify-email"
+    | "/(auth)/forgot-password"
+    | "/(auth)/reset-password"
+    | "/(auth)/sign-in"
+    | "/(auth)/sign-up"
+    | "/(features)/donation"
+    | "/(features)/reports"
+    | "/(features)/volunteers"
+    | "/children/$childId"
+    | "/reports/$reportId";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  DashboardRoute: typeof DashboardRoute
-  VerifyEmailRoute: typeof VerifyEmailRoute
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authResetPasswordRoute: typeof authResetPasswordRoute
-  authSignInRoute: typeof authSignInRoute
-  authSignUpRoute: typeof authSignUpRoute
-  featuresDonationsRoute: typeof featuresDonationsRoute
-  featuresReportsRoute: typeof featuresReportsRoute
-  featuresVolunteersRoute: typeof featuresVolunteersRoute
-  ChildrenChildIdRoute: typeof ChildrenChildIdRoute
-  ReportsReportIdRoute: typeof ReportsReportIdRoute
+  IndexRoute: typeof IndexRoute;
+  AboutRoute: typeof AboutRoute;
+  DashboardRoute: typeof DashboardRoute;
+  VerifyEmailRoute: typeof VerifyEmailRoute;
+  authForgotPasswordRoute: typeof authForgotPasswordRoute;
+  authResetPasswordRoute: typeof authResetPasswordRoute;
+  authSignInRoute: typeof authSignInRoute;
+  authSignUpRoute: typeof authSignUpRoute;
+  featuresDonationRoute: typeof featuresDonationRoute;
+  featuresReportsRoute: typeof featuresReportsRoute;
+  featuresVolunteersRoute: typeof featuresVolunteersRoute;
+  ChildrenChildIdRoute: typeof ChildrenChildIdRoute;
+  ReportsReportIdRoute: typeof ReportsReportIdRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/verify-email': {
-      id: '/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof VerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/$reportId': {
-      id: '/reports/$reportId'
-      path: '/reports/$reportId'
-      fullPath: '/reports/$reportId'
-      preLoaderRoute: typeof ReportsReportIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/children/$childId': {
-      id: '/children/$childId'
-      path: '/children/$childId'
-      fullPath: '/children/$childId'
-      preLoaderRoute: typeof ChildrenChildIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(features)/volunteers': {
-      id: '/(features)/volunteers'
-      path: '/volunteers'
-      fullPath: '/volunteers'
-      preLoaderRoute: typeof featuresVolunteersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(features)/reports': {
-      id: '/(features)/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof featuresReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(features)/donations': {
-      id: '/(features)/donations'
-      path: '/donations'
-      fullPath: '/donations'
-      preLoaderRoute: typeof featuresDonationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-up': {
-      id: '/(auth)/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof authSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-in': {
-      id: '/(auth)/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof authSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/reset-password': {
-      id: '/(auth)/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/verify-email": {
+      id: "/verify-email";
+      path: "/verify-email";
+      fullPath: "/verify-email";
+      preLoaderRoute: typeof VerifyEmailRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/dashboard": {
+      id: "/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof DashboardRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/about": {
+      id: "/about";
+      path: "/about";
+      fullPath: "/about";
+      preLoaderRoute: typeof AboutRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/reports/$reportId": {
+      id: "/reports/$reportId";
+      path: "/reports/$reportId";
+      fullPath: "/reports/$reportId";
+      preLoaderRoute: typeof ReportsReportIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/children/$childId": {
+      id: "/children/$childId";
+      path: "/children/$childId";
+      fullPath: "/children/$childId";
+      preLoaderRoute: typeof ChildrenChildIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(features)/volunteers": {
+      id: "/(features)/volunteers";
+      path: "/volunteers";
+      fullPath: "/volunteers";
+      preLoaderRoute: typeof featuresVolunteersRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(features)/reports": {
+      id: "/(features)/reports";
+      path: "/reports";
+      fullPath: "/reports";
+      preLoaderRoute: typeof featuresReportsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(features)/donation": {
+      id: "/(features)/donation";
+      path: "/donation";
+      fullPath: "/donation";
+      preLoaderRoute: typeof featuresDonationRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/sign-up": {
+      id: "/(auth)/sign-up";
+      path: "/sign-up";
+      fullPath: "/sign-up";
+      preLoaderRoute: typeof authSignUpRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/sign-in": {
+      id: "/(auth)/sign-in";
+      path: "/sign-in";
+      fullPath: "/sign-in";
+      preLoaderRoute: typeof authSignInRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/reset-password": {
+      id: "/(auth)/reset-password";
+      path: "/reset-password";
+      fullPath: "/reset-password";
+      preLoaderRoute: typeof authResetPasswordRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)/forgot-password": {
+      id: "/(auth)/forgot-password";
+      path: "/forgot-password";
+      fullPath: "/forgot-password";
+      preLoaderRoute: typeof authForgotPasswordRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -304,12 +304,12 @@ const rootRouteChildren: RootRouteChildren = {
   authResetPasswordRoute: authResetPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
-  featuresDonationsRoute: featuresDonationsRoute,
+  featuresDonationRoute: featuresDonationRoute,
   featuresReportsRoute: featuresReportsRoute,
   featuresVolunteersRoute: featuresVolunteersRoute,
   ChildrenChildIdRoute: ChildrenChildIdRoute,
   ReportsReportIdRoute: ReportsReportIdRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

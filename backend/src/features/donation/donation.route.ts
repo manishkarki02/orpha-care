@@ -3,17 +3,17 @@ import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import * as donationController from "@/features/donation/donation.controller";
 import {
-	createDonationRequestSchema,
-	getDonationRequestSchema,
-	updateDonationRequestSchema,
-} from "@/features/donation/donations.schema";
+  createDonationRequestSchema,
+  getDonationRequestSchema,
+  updateDonationRequestSchema,
+} from "@/features/donation/donation.schema";
 
 const router = Router();
 
 /**
  * @swagger
  * tags:
- *   name: Donations
+ *   name: Donation
  *   description: Donation management API
  */
 
@@ -22,7 +22,7 @@ const router = Router();
  * /donation:
  *   post:
  *     summary: Create a new donation
- *     tags: [Donations]
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -51,50 +51,50 @@ const router = Router();
  */
 
 router.post(
-	"/",
-	accessTokenValidator,
-	validationMiddleware(createDonationRequestSchema),
-	donationController.createDonation,
+  "/",
+  accessTokenValidator,
+  validationMiddleware(createDonationRequestSchema),
+  donationController.createDonation,
 );
 
 /**
  * @swagger
  * /donation:
  *   get:
- *     summary: Fetch all donations
- *     tags: [Donations]
+ *     summary: Fetch all donation
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of donations
+ *         description: List of donation
  *       401:
  *         description: Unauthorized
  */
-router.get("/", accessTokenValidator, donationController.fetchAllDonations);
+router.get("/", accessTokenValidator, donationController.fetchAllDonation);
 
 /**
  * @swagger
  * /donation/me:
  *   get:
- *     summary: Fetch donations made by the current user
- *     tags: [Donations]
+ *     summary: Fetch donation made by the current user
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of user's donations
+ *         description: List of user's donation
  *       401:
  *         description: Unauthorized
  */
-router.get("/me", accessTokenValidator, donationController.fetchMyDonations);
+router.get("/me", accessTokenValidator, donationController.fetchMyDonation);
 
 /**
  * @swagger
  * /donation/{id}:
  *   get:
  *     summary: Fetch donation details
- *     tags: [Donations]
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -111,10 +111,10 @@ router.get("/me", accessTokenValidator, donationController.fetchMyDonations);
  *         description: Donation not found
  */
 router.get(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(getDonationRequestSchema),
-	donationController.fetchDonationDetails,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(getDonationRequestSchema),
+  donationController.fetchDonationDetails,
 );
 
 /**
@@ -122,7 +122,7 @@ router.get(
  * /donation/{id}:
  *   post:
  *     summary: Update a donation
- *     tags: [Donations]
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -153,10 +153,10 @@ router.get(
  *         description: Validation error
  */
 router.post(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(updateDonationRequestSchema),
-	donationController.updateDonation,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(updateDonationRequestSchema),
+  donationController.updateDonation,
 );
 
 /**
@@ -164,7 +164,7 @@ router.post(
  * /donation/{id}:
  *   delete:
  *     summary: Delete a donation
- *     tags: [Donations]
+ *     tags: [Donation]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -181,10 +181,10 @@ router.post(
  *         description: Donation not found
  */
 router.delete(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(getDonationRequestSchema),
-	donationController.deleteDonation,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(getDonationRequestSchema),
+  donationController.deleteDonation,
 );
 
 export default router;

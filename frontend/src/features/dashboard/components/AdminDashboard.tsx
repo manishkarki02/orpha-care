@@ -3,14 +3,13 @@ import { fetchPendingAdoptionRequests } from "@/features/adoption/api";
 import { fetchChildren } from "@/features/children/api";
 import { fetchReports } from "@/features/reports/api";
 import { fetchVolunteers } from "@/features/volunteers/api";
-import { fetchAllDonations } from "@/features/donations/api";
+import { fetchAllDonation } from "@/features/donation/api";
 
 export default function AdminDashboard() {
-  const { data: pendingRequests, isLoading: requestsLoading } =
-    useCustomQuery({
-      key: ["adoptions", "requests", "pending"],
-      queryFn: fetchPendingAdoptionRequests,
-    });
+  const { data: pendingRequests, isLoading: requestsLoading } = useCustomQuery({
+    key: ["adoptions", "requests", "pending"],
+    queryFn: fetchPendingAdoptionRequests,
+  });
   const { data: children } = useCustomQuery({
     key: ["adoptions"],
     queryFn: fetchChildren,
@@ -23,9 +22,9 @@ export default function AdminDashboard() {
     key: ["volunteers"],
     queryFn: fetchVolunteers,
   });
-  const { data: donations } = useCustomQuery({
-    key: ["donations"],
-    queryFn: fetchAllDonations,
+  const { data: donation } = useCustomQuery({
+    key: ["donation"],
+    queryFn: fetchAllDonation,
   });
 
   return (
@@ -43,7 +42,7 @@ export default function AdminDashboard() {
         <StatCard label="Children Listed" value={children?.length} />
         <StatCard label="Missing Reports" value={reports?.length} />
         <StatCard label="Volunteers" value={volunteers?.length} />
-        <StatCard label="Donations" value={donations?.length} />
+        <StatCard label="Donation" value={donation?.length} />
       </div>
 
       <section className="flex flex-col gap-4">

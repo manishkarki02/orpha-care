@@ -1,4 +1,3 @@
-
 import LogoIcon from "@/components/icons/LogoIcon";
 import { Button } from "@/components/ui/button";
 import useThemeStore from "@/hooks/useThemeStore";
@@ -42,7 +41,7 @@ export default function NavigationBar() {
     },
     {
       label: "Donate",
-      to: "/donations",
+      to: "/donation",
     },
     {
       label: "About",
@@ -116,16 +115,16 @@ export default function NavigationBar() {
       {/* Mobile / Tablet Actions (hidden on large screens) */}
       <div className="flex items-center gap-4 lg:hidden">
         <motion.div
-            key={`mobile-${theme}`}
-            initial={{ rotate: -90, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.25 }}
-            className="cursor-pointer text-text-muted hover:text-dark"
-            onClick={toggleTheme}
+          key={`mobile-${theme}`}
+          initial={{ rotate: -90, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          transition={{ duration: 0.25 }}
+          className="cursor-pointer text-text-muted hover:text-dark"
+          onClick={toggleTheme}
         >
-            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
         </motion.div>
-        
+
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="text-text-dark hover:text-brand transition-colors"

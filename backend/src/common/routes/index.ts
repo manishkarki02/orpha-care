@@ -9,7 +9,7 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/reports", reportRoutes);
-router.use("/donations", donationRoutes);
+router.use("/donation", donationRoutes);
 router.use("/adoptions", adoptionRoutes);
 router.use("/volunteers", volunteerRoutes);
 

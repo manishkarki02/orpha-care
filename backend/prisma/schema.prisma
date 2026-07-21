@@ -1,11 +1,15 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+// ====================
+// ENUMS
+// ====================
 
 enum Role {
   Admin
@@ -36,39 +40,173 @@ enum DonationType {
   Money
 }
 
+enum DonationStatus {
+  Pending
+  Received
+  Rejected
+  Distributed
+}
+
 enum AdoptionRequestStatus {
-  pending
-  under_review
-  approved
-  rejected
+  Pending
+  UnderReview
+  Approved
+  Rejected
 }
 
-model Users {
-  id         String  @id @default(uuid())
-  name       String
-  email      String  @unique
-  phone      String  @unique
-  password   String
-  address    String
-  isVerified Boolean @default(false) @map("is_verified")
+enum TaskType {
+  AdoptionHomeSurvey
+  MissingChildFollowUp
+}
+
+enum TaskStatus {
+  Pending
+  InProgress
+  Submitted
+  Completed
+}
+
+enum TaskResult {
+  Suitable
+  NeedsReview
+  NotSuitable
+  PossibleMatch
+  NotFound
+  Found
+}
+
+// ====================
+// MODELS
+// ====================
+
+model User {
+  id String @id @default(uuid())
+
+  // Profile
+  name     String
+  email    String  @unique
+  phone    String  @unique
+  password String
+  address  String
+  image    String?
+
+  // Access
   role       Role    @default(User)
+  isVerified Boolean @default(false) @map("is_verified")
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  // Audit
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  donation             Donations[]
-  adoptedKid           KidsForAdoptions[]
-  adoptionReq          AdoptionRequests[]
-  missingReports       MissingReports[]   @relation("reportedBy")
-  createdMissingReport MissingReports[]   @relation("missingReportCreatedBy")
-  updatedMissingReport MissingReports[]   @relation("missingReportUpdatedBy")
+  // Domain relations
+  adoptedKids            KidsForAdoption[] @relation("KidAdopter")
+  adoptionRequests       AdoptionRequest[] @relation("AdoptionRequestAdopter")
+  assignedVolunteerTasks Task[]            @relation("TaskVolunteer")
+  reportedMissingReports MissingReport[]   @relation("MissingReportReporter")
+  donations              Donation[]        @relation("DonationDonor")
 
-  @@map("users") // map table name to lowercase
+  // Audit relations
+  createdAdoptionKids     KidsForAdoption[] @relation("KidCreatedBy")
+  updatedAdoptionKids     KidsForAdoption[] @relation("KidUpdatedBy")
+  deletedAdoptionKids     KidsForAdoption[] @relation("KidDeletedBy")
+  createdAdoptionRequests AdoptionRequest[] @relation("AdoptionRequestCreatedBy")
+  updatedAdoptionRequests AdoptionRequest[] @relation("AdoptionRequestUpdatedBy")
+  deletedAdoptionRequests AdoptionRequest[] @relation("AdoptionRequestDeletedBy")
+  createdMissingReports   MissingReport[]   @relation("MissingReportCreatedBy")
+  updatedMissingReports   MissingReport[]   @relation("MissingReportUpdatedBy")
+  deletedMissingReports   MissingReport[]   @relation("MissingReportDeletedBy")
+  createdTasks            Task[]            @relation("TaskCreatedBy")
+  updatedTasks            Task[]            @relation("TaskUpdatedBy")
+  deletedTasks            Task[]            @relation("TaskDeletedBy")
+  createdDonations        Donation[]        @relation("DonationCreatedBy")
+  updatedDonations        Donation[]        @relation("DonationUpdatedBy")
+  deletedDonations        Donation[]        @relation("DonationDeletedBy")
+
+  @@index([role])
+  @@index([isVerified])
+  @@map("users")
 }
 
-model MissingReports {
-  id              String   @id @default(uuid())
+model KidsForAdoption {
+  id String @id @default(uuid())
+
+  // Profile
+  picture     String?
+  name        String
+  age         Int
+  gender      Gender
+  province    Province
+  description String
+
+  // Adoption state
+  isAdopted Boolean @default(false) @map("is_adopted")
+
+  adopterId String? @map("adopter_id")
+  adopter   User?   @relation("KidAdopter", fields: [adopterId], references: [id])
+
+  // Audit
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdById String  @map("created_by_id")
+  createdBy   User    @relation("KidCreatedBy", fields: [createdById], references: [id])
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("KidUpdatedBy", fields: [updatedById], references: [id])
+  deletedById String? @map("deleted_by_id")
+  deletedBy   User?   @relation("KidDeletedBy", fields: [deletedById], references: [id])
+
+  // Domain relations
+  adoptionRequests AdoptionRequest[] @relation("AdoptionRequestKid")
+
+  @@index([isAdopted])
+  @@index([province])
+  @@index([adopterId])
+  @@index([createdById])
+  @@index([deletedAt])
+  @@map("kids_for_adoption")
+}
+
+model AdoptionRequest {
+  id String @id @default(uuid())
+
+  // Request state
+  status AdoptionRequestStatus @default(Pending)
+
+  kidId String          @map("kid_id")
+  kid   KidsForAdoption @relation("AdoptionRequestKid", fields: [kidId], references: [id])
+
+  adopterId String @map("adopter_id")
+  adopter   User   @relation("AdoptionRequestAdopter", fields: [adopterId], references: [id])
+
+  // Audit
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdById String  @map("created_by_id")
+  createdBy   User    @relation("AdoptionRequestCreatedBy", fields: [createdById], references: [id])
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("AdoptionRequestUpdatedBy", fields: [updatedById], references: [id])
+  deletedById String? @map("deleted_by_id")
+  deletedBy   User?   @relation("AdoptionRequestDeletedBy", fields: [deletedById], references: [id])
+
+  // Domain relations
+  tasks Task[] @relation("AdoptionRequestTasks")
+
+  @@index([status])
+  @@index([adopterId])
+  @@index([kidId])
+  @@index([createdById])
+  @@index([deletedAt])
+  @@map("adoption_requests")
+}
+
+model MissingReport {
+  id String @id @default(uuid())
+
+  // Missing child details
   name            String?
   lastSeenAddress String   @map("last_seen_address")
   lastSeenTime    DateTime @map("last_seen_time")
@@ -77,64 +215,101 @@ model MissingReports {
   longitude       Float
   latitude        Float
   image           String?
-  reporterId      String   @map("reporter_id")
-  reporter        Users    @relation("reportedBy", fields: [reporterId], references: [id])
 
+  reporterId String @map("reporter_id")
+  reporter   User   @relation("MissingReportReporter", fields: [reporterId], references: [id])
+
+  // Audit
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  createdBy String? @map("created_by")
-  creator   Users?  @relation("missingReportCreatedBy", fields: [createdBy], references: [id])
-  updatedBy String? @map("updated_by")
-  updater   Users?  @relation("missingReportUpdatedBy", fields: [updatedBy], references: [id])
+  createdById String  @map("created_by_id")
+  createdBy   User    @relation("MissingReportCreatedBy", fields: [createdById], references: [id])
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("MissingReportUpdatedBy", fields: [updatedById], references: [id])
+  deletedById String? @map("deleted_by_id")
+  deletedBy   User?   @relation("MissingReportDeletedBy", fields: [deletedById], references: [id])
 
+  // Domain relations
+  tasks Task[] @relation("MissingReportTasks")
+
+  @@index([reporterId])
+  @@index([createdById])
+  @@index([deletedAt])
   @@map("missing_reports")
 }
 
-model Donations {
-  id      String       @id @default(uuid())
-  weight  Decimal?     @db.Decimal(10, 2)
-  amount  Decimal?     @db.Decimal(10, 2)
-  type    DonationType
-  donorId String
-  donor   Users        @relation(fields: [donorId], references: [id])
+model Task {
+  id String @id @default(uuid())
 
+  // Task details
+  title       String
+  description String?
+  type        TaskType
+  status      TaskStatus  @default(Pending)
+  dueDate     DateTime?   @map("due_date")
+  result      TaskResult?
+  remarks     String?
+  images      String[]    @default([])
+
+  volunteerId       String           @map("volunteer_id")
+  volunteer         User             @relation("TaskVolunteer", fields: [volunteerId], references: [id])
+  adoptionRequestId String?          @map("adoption_request_id")
+  adoptionRequest   AdoptionRequest? @relation("AdoptionRequestTasks", fields: [adoptionRequestId], references: [id])
+  missingReportId   String?          @map("missing_report_id")
+  missingReport     MissingReport?   @relation("MissingReportTasks", fields: [missingReportId], references: [id])
+
+  // Audit
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdById String  @map("created_by_id")
+  createdBy   User    @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("TaskUpdatedBy", fields: [updatedById], references: [id])
+  deletedById String? @map("deleted_by_id")
+  deletedBy   User?   @relation("TaskDeletedBy", fields: [deletedById], references: [id])
+
+  @@index([volunteerId])
+  @@index([status])
+  @@index([missingReportId])
+  @@index([type])
+  @@index([adoptionRequestId])
+  @@index([createdById])
+  @@index([deletedAt])
+  @@map("tasks")
+}
+
+model Donation {
+  id String @id @default(uuid())
+
+  // Donation details
+  weight Decimal?       @db.Decimal(10, 2)
+  amount Decimal?       @db.Decimal(10, 2)
+  type   DonationType
+  status DonationStatus @default(Pending)
+
+  donorId String @map("donor_id")
+  donor   User   @relation("DonationDonor", fields: [donorId], references: [id])
+
+  // Audit
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdById String  @map("created_by_id")
+  createdBy   User    @relation("DonationCreatedBy", fields: [createdById], references: [id])
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("DonationUpdatedBy", fields: [updatedById], references: [id])
+  deletedById String? @map("deleted_by_id")
+  deletedBy   User?   @relation("DonationDeletedBy", fields: [deletedById], references: [id])
+
+  @@index([donorId])
+  @@index([type])
+  @@index([status])
+  @@index([createdById])
+  @@index([deletedAt])
   @@map("donations")
-}
-
-model Volunteers {
-  id      String  @id @default(uuid())
-  name    String
-  age     Int
-  picture String?
-
-  @@map("volunteers")
-}
-
-model KidsForAdoptions {
-  id          String             @id @default(uuid())
-  picture     String?
-  name        String
-  surname     String
-  age         Int
-  gender      Gender
-  province    Province
-  description String
-  adoptionReq AdoptionRequests[]
-  isAdopted   Boolean            @default(false)
-  adopterId   String?
-  adopter     Users?             @relation(fields: [adopterId], references: [id])
-
-  @@map("kids_for_adoptions")
-}
-
-model AdoptionRequests {
-  kidId     String
-  kid       KidsForAdoptions @relation(fields: [kidId], references: [id])
-  adopterId String
-  adopter   Users            @relation(fields: [adopterId], references: [id])
-
-  @@id([kidId, adopterId])
-  @@map("adoption_requests")
 }

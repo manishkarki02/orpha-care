@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { fetchMyReports } from "@/features/reports/api";
-import { fetchMyDonations } from "@/features/donations/api";
+import { fetchMyDonation } from "@/features/donation/api";
 import { fetchMyAdoptionRequests } from "@/features/adoption/api";
 
 export default function UserDashboard() {
@@ -10,9 +10,9 @@ export default function UserDashboard() {
     key: ["reports", "me"],
     queryFn: fetchMyReports,
   });
-  const { data: donations, isLoading: donationsLoading } = useCustomQuery({
-    key: ["donations", "me"],
-    queryFn: fetchMyDonations,
+  const { data: donation, isLoading: donationLoading } = useCustomQuery({
+    key: ["donation", "me"],
+    queryFn: fetchMyDonation,
   });
   const { data: requests, isLoading: requestsLoading } = useCustomQuery({
     key: ["adoptions", "requests", "me"],
@@ -26,7 +26,7 @@ export default function UserDashboard() {
           My Dashboard
         </h1>
         <p className="text-text-muted mt-2 text-lg">
-          Track your reports, donations, and adoption requests.
+          Track your reports, donation, and adoption requests.
         </p>
       </div>
 
@@ -44,21 +44,25 @@ export default function UserDashboard() {
               params={{ reportId: report.id }}
               className="p-4 rounded-xl border border-border bg-white dark:bg-bg-card hover:shadow-md transition-shadow"
             >
-              <p className="font-bold text-text-dark">{report.name ?? "Unknown Name"}</p>
-              <p className="text-sm text-text-muted">{report.lastSeenAddress}</p>
+              <p className="font-bold text-text-dark">
+                {report.name ?? "Unknown Name"}
+              </p>
+              <p className="text-sm text-text-muted">
+                {report.lastSeenAddress}
+              </p>
             </Link>
           ))}
         </div>
       </Section>
 
       <Section
-        title="My Donations"
-        isLoading={donationsLoading}
-        isEmpty={!donations?.length}
-        emptyText="You haven't made any donations yet."
+        title="My Donation"
+        isLoading={donationLoading}
+        isEmpty={!donation?.length}
+        emptyText="You haven't made any donation yet."
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {donations?.map((donation) => (
+          {donation?.map((donation) => (
             <div
               key={donation.id}
               className="p-4 rounded-xl border border-border bg-white dark:bg-bg-card"

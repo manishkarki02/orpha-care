@@ -9,12 +9,12 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import useCustomMutation from "@/hooks/useCustomMutation";
-import { createDonation } from "@/features/donations/api";
+import { createDonation } from "@/features/donation/api";
 
 const PRESET_AMOUNTS = [25, 50, 100];
 const GOODS_TYPES = ["Food", "Cloth", "Books"] as const;
 
-const donationSchema = z
+const donationchema = z
   .object({
     type: z.enum(["Money", "Food", "Cloth", "Books"]),
     amount: z
@@ -42,7 +42,7 @@ const donationSchema = z
     }
   });
 
-type DonationValues = z.infer<typeof donationSchema>;
+type DonationValues = z.infer<typeof donationchema>;
 
 export default function DonationForm() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -56,7 +56,7 @@ export default function DonationForm() {
     watch,
     formState: { errors },
   } = useForm<DonationValues>({
-    resolver: zodResolver(donationSchema),
+    resolver: zodResolver(donationchema),
     defaultValues: { type: "Money", amount: 50 },
   });
 
@@ -108,7 +108,7 @@ export default function DonationForm() {
             "flex-1 py-4 text-sm font-bold text-center transition-colors border-b-2",
             activeTab === "money"
               ? "border-[#6366F1] text-[#6366F1]"
-              : "border-transparent text-text-muted hover:text-text-dark"
+              : "border-transparent text-text-muted hover:text-text-dark",
           )}
         >
           Donate Money
@@ -120,7 +120,7 @@ export default function DonationForm() {
             "flex-1 py-4 text-sm font-bold text-center transition-colors border-b-2",
             activeTab === "goods"
               ? "border-[#6366F1] text-[#6366F1]"
-              : "border-transparent text-text-muted hover:text-text-dark"
+              : "border-transparent text-text-muted hover:text-text-dark",
           )}
         >
           Donate Goods
@@ -134,7 +134,8 @@ export default function DonationForm() {
               Choose an amount
             </label>
             <p className="text-sm text-text-muted mb-2">
-              Choose a preset amount or enter a custom one. Every donation helps.
+              Choose a preset amount or enter a custom one. Every donation
+              helps.
             </p>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_AMOUNTS.map((amount) => (
@@ -148,7 +149,7 @@ export default function DonationForm() {
                     "py-3 rounded-lg text-sm font-bold transition-all border",
                     watch("amount") === amount
                       ? "bg-white border-[#6366F1] text-[#6366F1] shadow-sm"
-                      : "bg-gray-50 dark:bg-gray-800 border-transparent text-text-muted hover:bg-gray-100 dark:hover:bg-gray-700"
+                      : "bg-gray-50 dark:bg-gray-800 border-transparent text-text-muted hover:bg-gray-100 dark:hover:bg-gray-700",
                   )}
                 >
                   ${amount}
@@ -169,7 +170,9 @@ export default function DonationForm() {
                     value={field.value ?? ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === "" ? undefined : Number(e.target.value)
+                        e.target.value === ""
+                          ? undefined
+                          : Number(e.target.value),
                       )
                     }
                   />
@@ -197,7 +200,7 @@ export default function DonationForm() {
                     "py-3 rounded-lg text-sm font-bold transition-all border",
                     selectedType === goodsType
                       ? "bg-white border-[#6366F1] text-[#6366F1] shadow-sm"
-                      : "bg-gray-50 dark:bg-gray-800 border-transparent text-text-muted hover:bg-gray-100 dark:hover:bg-gray-700"
+                      : "bg-gray-50 dark:bg-gray-800 border-transparent text-text-muted hover:bg-gray-100 dark:hover:bg-gray-700",
                   )}
                 >
                   {goodsType}
@@ -218,7 +221,9 @@ export default function DonationForm() {
                     value={field.value ?? ""}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value === "" ? undefined : Number(e.target.value)
+                        e.target.value === ""
+                          ? undefined
+                          : Number(e.target.value),
                       )
                     }
                   />
