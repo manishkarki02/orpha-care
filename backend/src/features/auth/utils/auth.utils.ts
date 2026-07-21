@@ -1,5 +1,5 @@
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import bcrypt from "bcrypt";
-import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AuthenticationError, BadRequestError } from "@/common/utils/errorClass.utils";

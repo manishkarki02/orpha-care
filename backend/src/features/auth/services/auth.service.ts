@@ -1,11 +1,11 @@
 import { sendResetPasswordMail, sendVerificationMail } from "@/common/services/mail.service";
-import { Role } from "@/common/types/enums";
 import {
 	AuthenticationError,
 	BadRequestError,
 	InternalServerError,
 	NotFoundError,
 } from "@/common/utils/errorClass.utils";
+import Environment from "@/config/env.config";
 import prisma from "@/db";
 import type { LoginRequestSchema, RegisterRequestSchema } from "@/features/auth/auth.schema";
 import * as authUtils from "@/features/auth/utils/auth.utils";
@@ -13,7 +13,7 @@ import { consumeCachedToken, getCachedToken, setCachedToken } from "./tokenCache
 import { removeCachedUser, setCacheUser } from "./userCache.service";
 
 export const signUpUser = async (body: RegisterRequestSchema["body"]) => {
-	const { name, address, email, phone, password } = body;
+	const { name, address, email, phone, password, role } = body;
 
 	const existingUser = await prisma.user.findFirst({
 		where: {
@@ -39,7 +39,7 @@ export const signUpUser = async (body: RegisterRequestSchema["body"]) => {
 			email,
 			phone,
 			password: hashedPassword,
-			role: Role.USER,
+			role: role,
 		},
 	});
 	if (!user) {
@@ -104,7 +104,7 @@ export const resendVerificationToken = async (userEmail: string) => {
 	await sendVerificationMail(userEmail, token);
 };
 
-export const forgetPassword = async (userEmail: string) => {
+export const forgotPassword = async (userEmail: string) => {
 	const user = await prisma.user.findUnique({
 		where: { email: userEmail },
 	});
@@ -124,7 +124,9 @@ export const forgetPassword = async (userEmail: string) => {
 		token,
 	});
 
-	await sendResetPasswordMail(userEmail, token);
+	const resetLink = `${Environment.get("FRONTEND_URL")}/reset-password?token=${token}&email=${userEmail}`;
+
+	await sendResetPasswordMail(userEmail, resetLink);
 };
 
 export const resetPassword = async (userEmail: string, token: string, newPassword: string) => {

@@ -1,4 +1,5 @@
 import z from "zod/v4";
+import { Role } from "@/generated/prisma/enums";
 
 // Field Schema
 export const emailSchema = z.email("Invalid email address").trim().nonempty("Email is required");
@@ -15,6 +16,10 @@ const passwordSchema = z
 
 const phoneSchema = z.string().regex(/^[0-9]{10,15}$/, "Invalid phone number");
 const addressSchema = z.string().max(200, "Address must be at most 200 characters");
+const roleSchema = z
+	.enum(Role)
+	.default(Role.User)
+	.refine((role) => role !== Role.Admin, "Admin role cannot be selected.");
 
 // Request Schemas
 export const registerRequestSchema = z.object({
@@ -26,6 +31,7 @@ export const registerRequestSchema = z.object({
 				password: passwordSchema,
 				phone: phoneSchema,
 				confirmPassword: z.string().min(1, "Confirm Password must be provided"),
+				role: roleSchema,
 				address: addressSchema,
 			},
 			"Request Body is required",
@@ -47,6 +53,15 @@ export const resendVerificationRequestSchema = z.object({
 	query: z.object({
 		email: emailSchema,
 	}),
+});
+
+export const forgotPasswordRequestSchema = z.object({
+	body: z.object(
+		{
+			email: emailSchema,
+		},
+		"Request Body is required",
+	),
 });
 
 export const resetPasswordRequestSchema = z.object({
@@ -83,6 +98,7 @@ export const refreshTokenRequestSchema = z.object({
 export type RegisterRequestSchema = z.infer<typeof registerRequestSchema>;
 export type VerificationRequestSchema = z.infer<typeof verificationRequestSchema>;
 export type ResendVerificationRequestSchema = z.infer<typeof resendVerificationRequestSchema>;
+export type ForgotPasswordRequestSchema = z.infer<typeof forgotPasswordRequestSchema>;
 export type ResetPasswordRequestSchema = z.infer<typeof resetPasswordRequestSchema>;
 export type LoginRequestSchema = z.infer<typeof loginRequestSchema>;
 export type RefreshTokenRequestSchema = z.infer<typeof refreshTokenRequestSchema>;

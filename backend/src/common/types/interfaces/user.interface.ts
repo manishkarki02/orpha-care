@@ -1,4 +1,4 @@
-import type { Role } from "../enums";
+import type { Role } from "@/generated/prisma/enums";
 
 export interface IUser {
 	id: string;
@@ -7,5 +7,5 @@ export interface IUser {
 	address?: string;
 	createdAt: Date;
 	role: Role;
-	[key: string]: any;
+	[key: string]: unknown;
 }

@@ -40,6 +40,7 @@ export const ResetPasswordForm = () => {
   // Let's use window.location.search for simplicity if we are not sure about route def
   const searchParams = new URL(window.location.href).searchParams;
   const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
   const {
     register,
@@ -54,17 +55,18 @@ export const ResetPasswordForm = () => {
   });
 
   const onSubmit = async (data: ResetPasswordValues) => {
-    if (!token) {
-        toast.error("Invalid or missing reset token");
-        return;
+    if (!token || !email) {
+      toast.error("Invalid or missing reset token");
+      return;
     }
 
     setIsLoading(true);
     try {
-      await api.post("/auth/reset-password", {
-          token,
-          password: data.password,
-          confirmPassword: data.confirmPassword
+      const resetUrl = `/auth/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+
+      await api.post(resetUrl, {
+        newPassword: data.password,
+        confirmNewPassword: data.confirmPassword,
       });
       toast.success("Password reset successfully. Please sign in.");
       navigate({ to: "/signin" });
@@ -77,17 +79,17 @@ export const ResetPasswordForm = () => {
     }
   };
 
-  if (!token) {
-      return (
-          <Card className="w-full">
-              <CardContent className="pt-6 text-center text-red-500">
-                  Invalid Request: Missing Token
-              </CardContent>
-              <CardFooter className="justify-center hover:underline">
-                  <Link to="/signin">Back to Sign In</Link>
-              </CardFooter>
-          </Card>
-      )
+  if (!token || !email) {
+    return (
+      <Card className="w-full">
+        <CardContent className="pt-6 text-center text-red-500">
+          Invalid Request: Missing Token
+        </CardContent>
+        <CardFooter className="justify-center hover:underline">
+          <Link to="/signin">Back to Sign In</Link>
+        </CardFooter>
+      </Card>
+    );
   }
 
   return (

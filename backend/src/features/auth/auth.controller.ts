@@ -3,6 +3,7 @@ import type { ValidatedRequestHandler } from "@/common/types";
 import ApiResponse from "@/common/utils/response.utils";
 import Environment from "@/config/env.config";
 import type {
+	ForgotPasswordRequestSchema,
 	LoginRequestSchema,
 	RefreshTokenRequestSchema,
 	RegisterRequestSchema,
@@ -42,11 +43,11 @@ export const resendVerificationToken: ValidatedRequestHandler<
 	});
 };
 
-export const forgetPassword: ValidatedRequestHandler<ResendVerificationRequestSchema> = async (
+export const forgotPassword: ValidatedRequestHandler<ForgotPasswordRequestSchema> = async (
 	req,
 	res,
 ) => {
-	await authService.forgetPassword(req.body.email);
+	await authService.forgotPassword(req.body.email);
 
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,

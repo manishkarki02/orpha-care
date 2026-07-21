@@ -4,6 +4,7 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import { catchAsync } from "@/common/utils/error.utils";
 import * as authController from "@/features/auth/auth.controller";
 import {
+	forgotPasswordRequestSchema,
 	loginRequestSchema,
 	refreshTokenRequestSchema,
 	registerRequestSchema,
@@ -238,17 +239,21 @@ router.post("/signout", accessTokenValidator, catchAsync(authController.logoutUs
 
 /**
  * @swagger
- * /auth/forget-password:
- *   get:
+ * /auth/forgot-password:
+ *   post:
  *     summary: Request password reset link
  *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: email
- *         required: true
- *         schema:
- *           type: string
- *         description: User's email address
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Reset password email sent successfully
@@ -259,10 +264,10 @@ router.post("/signout", accessTokenValidator, catchAsync(authController.logoutUs
  *       500:
  *         description: Internal server error
  */
-router.get(
-	"/forget-password",
-	validationMiddleware(resendVerificationRequestSchema),
-	catchAsync(authController.forgetPassword),
+router.post(
+	"/forgot-password",
+	validationMiddleware(forgotPasswordRequestSchema),
+	catchAsync(authController.forgotPassword),
 );
 
 /**
