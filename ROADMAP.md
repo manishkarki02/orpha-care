@@ -12,7 +12,7 @@ The core domain logic the product is missing. Today an adoption request is just 
 - Frontend: approve/reject actions on the admin dashboard, request status visible to the user.
 - This is a state machine + transaction + authorization exercise — design it before coding it.
 
-## 2. Statuses for reports and donations
+## 2. Statuses for reports and donation
 
 - `MissingReport`: `OPEN → FOUND → CLOSED`, admin-controlled transitions.
 - `Donation`: `PLEDGED → RECEIVED → DISTRIBUTED` if physical logistics should be tracked.
@@ -20,7 +20,7 @@ The core domain logic the product is missing. Today an adoption request is just 
 
 ## 3. Ownership authorization
 
-Enforce consistently: users can only update/delete **their own** reports/donations/requests; admins can manage everything. Add tests that prove a user cannot touch another user's records.
+Enforce consistently: users can only update/delete **their own** reports/donation/requests; admins can manage everything. Add tests that prove a user cannot touch another user's records.
 
 ## 4. Pagination, search, and filters
 
@@ -42,7 +42,7 @@ Currently: auth service + adoption service + one frontend component test. Extend
 
 ## 7. Product ideas (later)
 
-- Volunteer *applications* (apply → admin approves) instead of an open volunteer list.
+- Volunteer _applications_ (apply → admin approves) instead of an open volunteer list.
 - Contact/visibility controls on missing-child reports (public listing vs. private contact details).
 - Notifications (email on request approval, report status change).
 - User dashboard stats and admin analytics.
