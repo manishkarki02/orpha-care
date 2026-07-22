@@ -1,8 +1,12 @@
 import z from "zod/v4";
-import { DonationType } from "@/generated/prisma/enums";
+import { queryValidationSchema } from "@/common/validation/query.schema";
+import { DonationStatus, DonationType } from "@/generated/prisma/enums";
 
 // Field Schemas
 const typeSchema = z.enum(DonationType, "Invalid Donation Type");
+const donationSortBySchema = z
+	.enum(["createdAt", "amount", "weight", "status"])
+	.optional();
 
 const amountSchema = z
 	.number("Amount must be a number")
@@ -59,6 +63,34 @@ export const updateDonationRequestSchema = z.object({
 		),
 });
 
+export const fetchDonationsRequestSchema = z.object({
+	query: z
+		.object({
+			...queryValidationSchema.shape,
+
+			type: typeSchema.optional(),
+			status: z.enum(DonationStatus, "Invalid Donation Status").optional(),
+
+			fromDate: z.coerce
+				.date("Invalid from date")
+				.transform((d) => d.toISOString())
+				.optional(),
+			toDate: z.coerce
+				.date("Invalid to date")
+				.transform((d) => d.toISOString())
+				.optional(),
+
+			sortBy: donationSortBySchema,
+		})
+		.refine(
+			(q) =>
+				!q.fromDate ||
+				!q.toDate ||
+				new Date(q.fromDate) <= new Date(q.toDate),
+			{ error: "FromDate must be before or equal to toDate" },
+		),
+});
+
 export const fetchDonationDetailRequestSchema = z.object({
 	params: z.object({
 		id: z.uuidv4("Invalid donation ID"),
@@ -67,4 +99,5 @@ export const fetchDonationDetailRequestSchema = z.object({
 
 export type CreateDonationRequestSchema = z.infer<typeof createDonationRequestSchema>;
 export type UpdateDonationRequestSchema = z.infer<typeof updateDonationRequestSchema>;
+export type FetchDonationsRequestSchema = z.infer<typeof fetchDonationsRequestSchema>;
 export type FetchDonationDetailRequestSchema = z.infer<typeof fetchDonationDetailRequestSchema>;
