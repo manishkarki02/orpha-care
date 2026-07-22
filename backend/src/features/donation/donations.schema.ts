@@ -4,9 +4,7 @@ import { DonationStatus, DonationType } from "@/generated/prisma/enums";
 
 // Field Schemas
 const typeSchema = z.enum(DonationType, "Invalid Donation Type");
-const donationSortBySchema = z
-	.enum(["createdAt", "amount", "weight", "status"])
-	.optional();
+const donationSortBySchema = z.enum(["createdAt", "amount", "weight", "status"]).optional();
 
 const amountSchema = z
 	.number("Amount must be a number")
@@ -82,13 +80,9 @@ export const fetchDonationsRequestSchema = z.object({
 
 			sortBy: donationSortBySchema,
 		})
-		.refine(
-			(q) =>
-				!q.fromDate ||
-				!q.toDate ||
-				new Date(q.fromDate) <= new Date(q.toDate),
-			{ error: "FromDate must be before or equal to toDate" },
-		),
+		.refine((q) => !q.fromDate || !q.toDate || new Date(q.fromDate) <= new Date(q.toDate), {
+			error: "FromDate must be before or equal to toDate",
+		}),
 });
 
 export const fetchDonationDetailRequestSchema = z.object({

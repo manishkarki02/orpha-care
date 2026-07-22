@@ -5,10 +5,10 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import * as donationController from "@/features/donation/donation.controller";
 import { Role } from "@/generated/prisma/enums";
 import {
-  createDonationRequestSchema,
-  fetchDonationDetailRequestSchema,
-  fetchDonationsRequestSchema,
-  updateDonationRequestSchema,
+	createDonationRequestSchema,
+	fetchDonationDetailRequestSchema,
+	fetchDonationsRequestSchema,
+	updateDonationRequestSchema,
 } from "./donations.schema";
 
 const router = Router();
@@ -202,10 +202,10 @@ const router = Router();
  */
 
 router.post(
-  "/",
-  accessTokenValidator,
-  validationMiddleware(createDonationRequestSchema),
-  donationController.createDonation,
+	"/",
+	accessTokenValidator,
+	validationMiddleware(createDonationRequestSchema),
+	donationController.createDonation,
 );
 
 /**
@@ -241,11 +241,11 @@ router.post(
  *         $ref: '#/components/responses/Forbidden'
  */
 router.get(
-  "/",
-  accessTokenValidator,
-  requireRole(Role.Admin),
-  validationMiddleware(fetchDonationsRequestSchema),
-  donationController.fetchDonations
+	"/",
+	accessTokenValidator,
+	requireRole(Role.Admin),
+	validationMiddleware(fetchDonationsRequestSchema),
+	donationController.fetchDonations,
 );
 
 /**
@@ -279,10 +279,10 @@ router.get(
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get(
-  "/me",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationsRequestSchema),
-  donationController.fetchMyDonations,
+	"/me",
+	accessTokenValidator,
+	validationMiddleware(fetchDonationsRequestSchema),
+	donationController.fetchMyDonations,
 );
 
 /**
@@ -328,10 +328,10 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.get(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationDetailRequestSchema),
-  donationController.fetchDonationDetails,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(fetchDonationDetailRequestSchema),
+	donationController.fetchDonationDetails,
 );
 
 /**
@@ -412,10 +412,10 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.patch(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(updateDonationRequestSchema),
-  donationController.updateDonation,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(updateDonationRequestSchema),
+	donationController.updateDonation,
 );
 
 /**
@@ -464,10 +464,10 @@ router.patch(
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationDetailRequestSchema),
-  donationController.deleteDonation,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(fetchDonationDetailRequestSchema),
+	donationController.deleteDonation,
 );
 
 export default router;
