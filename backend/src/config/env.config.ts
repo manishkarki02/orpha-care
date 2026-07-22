@@ -1,5 +1,5 @@
+import path from "node:path";
 import dotenv from "dotenv";
-import path from "path";
 import { z } from "zod/v4";
 
 dotenv.config({
@@ -50,7 +50,7 @@ class Environment {
 		const result = schema.safeParse(process.env);
 
 		if (!result.success) {
-			console.error("❌ Invalid environment variables:", result.error);
+			console.error("Invalid environment variables:", result.error);
 			process.exit(1);
 		}
 

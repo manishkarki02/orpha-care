@@ -1,12 +1,12 @@
 import type { Request, RequestHandler } from "express";
 
 export type ValidatedRequestHandler<
-	TSchema extends { params?: any; body?: any; query?: any } = {
-		params?: any;
-		body?: any;
-		query?: any;
+	TSchema extends { params?: unknown; body?: unknown; query?: unknown } = {
+		params?: unknown;
+		body?: unknown;
+		query?: unknown;
 	},
-	TResponse = any,
+	TResponse = unknown,
 > = RequestHandler<
 	TSchema["params"] extends object ? TSchema["params"] : Request["params"],
 	TResponse,

@@ -13,7 +13,7 @@ interface CombinedSchema extends ZodObject {
 
 // ---------------------------- Validation Middleware ---------------------------- //
 export const validationMiddleware = (schema: CombinedSchema) => {
-	return async (req: Request, res: Response, next: NextFunction) => {
+	return async (req: Request, _res: Response, next: NextFunction) => {
 		try {
 			const result = schema.safeParse({
 				params: req.params,

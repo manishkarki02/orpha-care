@@ -20,7 +20,7 @@ export const createAdoptionKid = async (
 	role: string,
 	file: CreateAdoptionRequestSchema["file"],
 ) => {
-	if (role !== Role.ADMIN) {
+	if (role !== Role.Admin) {
 		throw new AuthorizationError("You are not authorized to create the kids for adoption.");
 	}
 
@@ -49,7 +49,7 @@ export const createAdoptionKid = async (
 
 // Get all kids for adoption
 export const fetchAllAdoptionKids = async (query: FetchAdoptionRequestsSchema["query"]) => {
-	const queryFilter: { [key: string]: any } = {};
+	const queryFilter: { [key: string]: unknown } = {};
 	if (query.gender) {
 		queryFilter.gender = query.gender;
 	}

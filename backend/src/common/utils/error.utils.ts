@@ -5,7 +5,9 @@ import type { Errors } from "./errorClass.utils";
 
 // ---------------------------- Format Zod Error Function ---------------------------- //
 export const catchAsync =
-	<T extends { params?: any; body?: any; query?: any }>(fn: ValidatedRequestHandler<T>) =>
+	<T extends { params?: unknown; body?: unknown; query?: unknown }>(
+		fn: ValidatedRequestHandler<T>,
+	) =>
 	(req: Request, res: Response, next: NextFunction) => {
 		Promise.resolve(fn(req, res, next)).catch((err) => next(err));
 	};
