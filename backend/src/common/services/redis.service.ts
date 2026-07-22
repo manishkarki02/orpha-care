@@ -1,15 +1,11 @@
 import redis from "redis";
 import Environment from "../../config/env.config";
 
-class Redis {
-	static instance: Redis;
+class RedisService {
+	static instance: RedisService;
 	private client!: redis.RedisClientType;
 
-	constructor() {
-		if (Redis.instance) {
-			return Redis.instance;
-		}
-
+	private constructor() {
 		this.client = redis.createClient({
 			url: Environment.get("REDIS_URL"),
 		});
@@ -17,21 +13,26 @@ class Redis {
 		this.client.on("error", (err) => {
 			console.error("Redis Client Error", err);
 		});
-
-		this.client.on("connect", () => {
-			console.log("Redis client connected");
-		});
-
-		Redis.instance = this;
 	}
 
 	static getInstance() {
-		return new Redis();
+		if (!RedisService.instance) {
+			RedisService.instance = new RedisService();
+		}
+
+		return RedisService.instance;
 	}
 
-	async connect() {
+	public async connect() {
 		if (!this.client.isOpen) {
 			await this.client.connect();
+			console.log("✅ Redis connected");
 		}
 	}
+
+	public getClient() {
+		return this.client;
+	}
 }
+
+export default RedisService.getInstance();

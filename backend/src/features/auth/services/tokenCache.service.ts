@@ -1,6 +1,8 @@
+import redisService from "@/common/services/redis.service";
 import Environment from "@/config/env.config";
-import redisClient from "@/config/redis.config";
 import { sha256, timeSafeCompare } from "../utils/auth.utils";
+
+const redisClient = redisService.getClient();
 
 type CachedTokenType = "reset-password" | "verify-email" | "refresh-token";
 
@@ -17,7 +19,7 @@ const TOKEN_CONFIG = {
 		expiry: 300,
 		key: (email: string) => `verify-email:${sha256(email)}`,
 	},
-} satisfies Record<CachedTokenType, any>;
+} satisfies Record<CachedTokenType, unknown>;
 
 export const setCachedToken = async (
 	type: CachedTokenType,
