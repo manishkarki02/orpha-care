@@ -30,8 +30,8 @@ function tokenValidator(tokenType: "ACCESS_TOKEN" | "REFRESH_TOKEN") {
 
 function getToken(req: Request, type: "ACCESS_TOKEN" | "REFRESH_TOKEN"): string | null {
 	if (type === "ACCESS_TOKEN") {
-		const bearerToken = req.headers["authorization"];
-		if (!bearerToken || !bearerToken.trim()) {
+		const bearerToken = req.headers.authorization;
+		if (!bearerToken?.trim()) {
 			return null;
 		}
 		return bearerToken.split(" ")[1];
