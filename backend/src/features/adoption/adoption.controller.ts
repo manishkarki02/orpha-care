@@ -1,6 +1,6 @@
 import HttpStatus from "http-status";
 import type { ValidatedRequestHandler } from "@/common/types";
-import ApiResponse from "@/common/utils/response.utils";
+import { successResponse } from "@/common/utils/response.utils";
 import type {
 	AdoptionRequestIdSchema,
 	CreateAdoptionRequestSchema,
@@ -16,7 +16,7 @@ export const createAdoptionKid: ValidatedRequestHandler<CreateAdoptionRequestSch
 ) => {
 	const createdKid = await adoptionService.createAdoptionKid(req.body, res.locals.role, req.file);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.CREATED,
 		message: "Adoption kid created successfully.",
 		data: createdKid,
@@ -30,7 +30,7 @@ export const fetchAllKids: ValidatedRequestHandler<FetchAdoptionRequestsSchema> 
 ) => {
 	const kids = await adoptionService.fetchAllAdoptionKids(req.query);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Adoption kids fetched successfully.",
 		data: kids,
@@ -43,7 +43,7 @@ export const fetchAdoptionKidDetails: ValidatedRequestHandler<AdoptionRequestIdS
 ) => {
 	const kidDetail = await adoptionService.fetchAdoptionKidById(req.params.id);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Adoption kid detail fetched successfully.",
 		data: kidDetail,
@@ -54,7 +54,7 @@ export const fetchAdoptionKidDetails: ValidatedRequestHandler<AdoptionRequestIdS
 export const fetchMyAdoptionRequests: ValidatedRequestHandler = async (_req, res) => {
 	const requests = await adoptionService.fetchMyAdoptionRequests(res.locals.userId);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Adoption requests fetched successfully.",
 		data: requests,
@@ -65,7 +65,7 @@ export const fetchMyAdoptionRequests: ValidatedRequestHandler = async (_req, res
 export const fetchPendingAdoptionRequests: ValidatedRequestHandler = async (_req, res) => {
 	const requests = await adoptionService.fetchPendingAdoptionRequests();
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Pending adoption requests fetched successfully.",
 		data: requests,
@@ -79,7 +79,7 @@ export const updateAdoptionKid: ValidatedRequestHandler<UpdateAdoptionRequestSch
 ) => {
 	const updatedKid = await adoptionService.updateAdoptionKid(req.params.id, req.body, req.file);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Donation updated successfully.",
 		data: updatedKid,
@@ -93,7 +93,7 @@ export const deleteAdoptionKid: ValidatedRequestHandler<AdoptionRequestIdSchema>
 ) => {
 	await adoptionService.deleteAdoptionKid(req.params.id);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Adoption kid deleted successfully.",
 	});
@@ -109,7 +109,7 @@ export const requestForAdoption: ValidatedRequestHandler<AdoptionRequestIdSchema
 		res.locals.userId,
 	);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.CREATED,
 		message: "Kid adoption request sent successfully.",
 		data: createdAdoptionRequest,

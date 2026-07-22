@@ -1,9 +1,9 @@
 // Importing external modules
 
+import path from "node:path";
 import cors from "cors";
 import express, { type Application } from "express";
 import HttpStatus from "http-status";
-import path from "path";
 
 const app: Application = express();
 
@@ -11,7 +11,7 @@ import swaggerUi from "swagger-ui-express";
 import router from "@/common/routes";
 import swaggerSpec from "@/config/swagger.config";
 import globalErrorHandler from "./common/middlewares/error.middleware";
-import ApiResponse from "./common/utils/response.utils";
+import { errorResponse } from "./common/utils/response.utils";
 // Importing custom modules
 import Environment from "./config/env.config";
 
@@ -39,7 +39,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api", router);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use((_req, res) => {
-	ApiResponse.error(res, {
+	errorResponse(res, {
 		statusCode: HttpStatus.NOT_FOUND,
 		message: "API endpoint not found",
 	});
