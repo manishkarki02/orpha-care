@@ -4,94 +4,120 @@ import { DonationStatus, DonationType } from "@/generated/prisma/enums";
 
 // Field Schemas
 const typeSchema = z.enum(DonationType, "Invalid Donation Type");
-const donationSortBySchema = z.enum(["createdAt", "amount", "weight", "status"]).optional();
+const donationSortBySchema = z
+  .enum(["createdAt", "amount", "weight", "status"])
+  .optional();
 
 const amountSchema = z
-	.number("Amount must be a number")
-	.min(1, "Amount must be at least 1")
-	.max(1000000, "Amount must be at most 1,000,000");
+  .number("Amount must be a number")
+  .min(1, "Amount must be at least 1")
+  .max(1000000, "Amount must be at most 1,000,000");
 
 const weightSchema = z
-	.number("Weight must be a number")
-	.min(0.1, "Weight must be at least 0.1 kg")
-	.max(150, "Weight cannot be more than 150 kg");
+  .number("Weight must be a number")
+  .min(0.1, "Weight must be at least 0.1 kg")
+  .max(150, "Weight cannot be more than 150 kg");
 
 // Request Schemas
 export const createDonationRequestSchema = z.object({
-	body: z
-		.object(
-			{
-				amount: amountSchema.optional(),
-				weight: weightSchema.optional(),
-				type: typeSchema,
-			},
-			"Request Body is required",
-		)
-		.refine(
-			(data) => {
-				if (data.type === DonationType.Money) {
-					return data.amount !== undefined && data.weight === undefined;
-				} else {
-					return data.weight !== undefined && data.amount === undefined;
-				}
-			},
-			{
-				message:
-					"For 'money' type, 'amount' must be provided and 'weight' must not be provided. For 'other' type, 'weight' must be provided and 'amount' must not be provided.",
-			},
-		),
+  body: z
+    .object(
+      {
+        amount: amountSchema.optional(),
+        weight: weightSchema.optional(),
+        type: typeSchema,
+      },
+      "Request Body is required",
+    )
+    .refine(
+      (data) => {
+        if (data.type === DonationType.Money) {
+          return data.amount !== undefined && data.weight === undefined;
+        } else {
+          return data.weight !== undefined && data.amount === undefined;
+        }
+      },
+      {
+        message:
+          "For 'money' type, 'amount' must be provided and 'weight' must not be provided. For 'other' type, 'weight' must be provided and 'amount' must not be provided.",
+      },
+    ),
 });
 
 export const updateDonationRequestSchema = z.object({
-	params: z.object({
-		id: z.uuidv4("Invalid donation ID"),
-	}),
-	body: z
-		.object({
-			type: typeSchema.optional(),
-			weight: weightSchema.optional(),
-		})
-		.refine(
-			(data) => data.type !== DonationType.Money,
-			"Donation of monetary type cannot be changed.",
-		)
-		.refine(
-			(data) => data.type !== undefined || data.weight !== undefined,
-			"Either type or weight should be changed.",
-		),
+  params: z.object({
+    id: z.uuidv4("Invalid donation ID"),
+  }),
+  body: z
+    .object({
+      type: typeSchema.optional(),
+      weight: weightSchema.optional(),
+    })
+    .refine(
+      (data) => data.type !== DonationType.Money,
+      "Donation of monetary type cannot be changed.",
+    )
+    .refine(
+      (data) => data.type !== undefined || data.weight !== undefined,
+      "Either type or weight should be changed.",
+    ),
+});
+
+export const updateDonationStatusRequestSchema = z.object({
+  params: z.object({
+    id: z.uuidv4("Invalid Donation ID"),
+  }),
+  body: z.object({
+    status: z.enum(DonationStatus, "Invalid donation status"),
+  }),
 });
 
 export const fetchDonationsRequestSchema = z.object({
-	query: z
-		.object({
-			...queryValidationSchema.shape,
+  query: z
+    .object({
+      ...queryValidationSchema.shape,
 
-			type: typeSchema.optional(),
-			status: z.enum(DonationStatus, "Invalid Donation Status").optional(),
+      type: typeSchema.optional(),
+      status: z.enum(DonationStatus, "Invalid Donation Status").optional(),
 
-			fromDate: z.coerce
-				.date("Invalid from date")
-				.transform((d) => d.toISOString())
-				.optional(),
-			toDate: z.coerce
-				.date("Invalid to date")
-				.transform((d) => d.toISOString())
-				.optional(),
+      fromDate: z.coerce
+        .date("Invalid from date")
+        .transform((d) => d.toISOString())
+        .optional(),
+      toDate: z.coerce
+        .date("Invalid to date")
+        .transform((d) => d.toISOString())
+        .optional(),
 
-			sortBy: donationSortBySchema,
-		})
-		.refine((q) => !q.fromDate || !q.toDate || new Date(q.fromDate) <= new Date(q.toDate), {
-			error: "FromDate must be before or equal to toDate",
-		}),
+      sortBy: donationSortBySchema,
+    })
+    .refine(
+      (q) =>
+        !q.fromDate || !q.toDate || new Date(q.fromDate) <= new Date(q.toDate),
+      {
+        error: "FromDate must be before or equal to toDate",
+      },
+    ),
 });
 
 export const fetchDonationDetailRequestSchema = z.object({
-	params: z.object({
-		id: z.uuidv4("Invalid donation ID"),
-	}),
+  params: z.object({
+    id: z.uuidv4("Invalid donation ID"),
+  }),
 });
 
-export type CreateDonationRequestSchema = z.infer<typeof createDonationRequestSchema>;
-export type UpdateDonationRequestSchema = z.infer<typeof updateDonationRequestSchema>;
-export type FetchDonationsRequestSchema = z.infer<typeof fetchDonationsRequestSchema>;
-export type FetchDonationDetailRequestSchema = z.infer<typeof fetchDonationDetailRequestSchema>;
+export type CreateDonationRequestSchema = z.infer<
+  typeof createDonationRequestSchema
+>;
+export type UpdateDonationRequestSchema = z.infer<
+  typeof updateDonationRequestSchema
+>;
+export type UpdateDonationStatusRequestSchema = z.infer<
+  typeof updateDonationStatusRequestSchema
+>;
+export type FetchDonationsRequestSchema = z.infer<
+  typeof fetchDonationsRequestSchema
+>;
+export type FetchDonationDetailRequestSchema = z.infer<
+  typeof fetchDonationDetailRequestSchema
+>;

@@ -5,10 +5,11 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import * as donationController from "@/features/donation/donation.controller";
 import { Role } from "@/generated/prisma/enums";
 import {
-	createDonationRequestSchema,
-	fetchDonationDetailRequestSchema,
-	fetchDonationsRequestSchema,
-	updateDonationRequestSchema,
+  createDonationRequestSchema,
+  fetchDonationDetailRequestSchema,
+  fetchDonationsRequestSchema,
+  updateDonationRequestSchema,
+  updateDonationStatusRequestSchema,
 } from "./donations.schema";
 
 const router = Router();
@@ -138,7 +139,7 @@ const router = Router();
 
 /**
  * @swagger
- * /donation:
+ * /donations:
  *   post:
  *     summary: Create a new donation
  *     description: |
@@ -202,15 +203,15 @@ const router = Router();
  */
 
 router.post(
-	"/",
-	accessTokenValidator,
-	validationMiddleware(createDonationRequestSchema),
-	donationController.createDonation,
+  "/",
+  accessTokenValidator,
+  validationMiddleware(createDonationRequestSchema),
+  donationController.createDonation,
 );
 
 /**
  * @swagger
- * /donation:
+ * /donations:
  *   get:
  *     summary: Fetch all donations (admin only)
  *     description: Returns every non-deleted donation. Requires the `Admin` role.
@@ -241,16 +242,16 @@ router.post(
  *         $ref: '#/components/responses/Forbidden'
  */
 router.get(
-	"/",
-	accessTokenValidator,
-	requireRole(Role.Admin),
-	validationMiddleware(fetchDonationsRequestSchema),
-	donationController.fetchDonations,
+  "/",
+  accessTokenValidator,
+  requireRole(Role.Admin),
+  validationMiddleware(fetchDonationsRequestSchema),
+  donationController.fetchDonations,
 );
 
 /**
  * @swagger
- * /donation/me:
+ * /donations/me:
  *   get:
  *     summary: Fetch donations made by the current user
  *     description: Returns the authenticated user's own non-deleted donations.
@@ -279,15 +280,15 @@ router.get(
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get(
-	"/me",
-	accessTokenValidator,
-	validationMiddleware(fetchDonationsRequestSchema),
-	donationController.fetchMyDonations,
+  "/me",
+  accessTokenValidator,
+  validationMiddleware(fetchDonationsRequestSchema),
+  donationController.fetchMyDonations,
 );
 
 /**
  * @swagger
- * /donation/{id}:
+ * /donations/{id}:
  *   get:
  *     summary: Fetch donation details
  *     description: Readable by the donation's owner or by an admin. Anyone else receives 403.
@@ -328,15 +329,15 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.get(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(fetchDonationDetailRequestSchema),
-	donationController.fetchDonationDetails,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(fetchDonationDetailRequestSchema),
+  donationController.fetchDonationDetails,
 );
 
 /**
  * @swagger
- * /donation/{id}:
+ * /donations/{id}:
  *   patch:
  *     summary: Update a donation
  *     description: |
@@ -412,15 +413,93 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.patch(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(updateDonationRequestSchema),
-	donationController.updateDonation,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(updateDonationRequestSchema),
+  donationController.updateDonation,
 );
 
 /**
  * @swagger
- * /donation/{id}:
+ * /donations/{id}/status:
+ *   patch:
+ *     summary: Update a donation's status (admin only)
+ *     description: |
+ *       Changes the `status` of a donation. Requires the `Admin` role.
+ *
+ *       Constraints:
+ *       - The status may **not** be set back to `Pending` (400).
+ *       - Soft-deleted donations are treated as not found (404).
+ *     tags: [Donation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Donation ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Received, Rejected, Distributed]
+ *                 description: New status. `Pending` is not accepted here.
+ *           examples:
+ *             receive:
+ *               summary: Mark as received
+ *               value: { status: Received }
+ *             reject:
+ *               summary: Reject the donation
+ *               value: { status: Rejected }
+ *     responses:
+ *       200:
+ *         description: Donation status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Donation status updated successfully.
+ *                 data:
+ *                   $ref: '#/components/schemas/DonationDetail'
+ *       400:
+ *         description: Validation error, or status was set back to Pending
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.patch(
+  "/:id/status",
+  accessTokenValidator,
+  requireRole(Role.Admin),
+  validationMiddleware(updateDonationStatusRequestSchema),
+  donationController.updateDonationStatus,
+);
+
+/**
+ * @swagger
+ * /donations/{id}:
  *   delete:
  *     summary: Cancel a donation
  *     description: |
@@ -464,10 +543,10 @@ router.patch(
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete(
-	"/:id",
-	accessTokenValidator,
-	validationMiddleware(fetchDonationDetailRequestSchema),
-	donationController.deleteDonation,
+  "/:id",
+  accessTokenValidator,
+  validationMiddleware(fetchDonationDetailRequestSchema),
+  donationController.deleteDonation,
 );
 
 export default router;
