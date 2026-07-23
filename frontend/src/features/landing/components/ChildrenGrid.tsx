@@ -3,7 +3,7 @@ import ChildCard from "./ChildCard";
 import ChildCardSkeleton from "./ChildCardSkeleton";
 import { cn } from "@/lib/utils";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import { fetchChildren } from "@/features/children/api";
+import { getChildren } from "@/features/children/api";
 import { PROVINCES } from "@/features/children/types";
 
 const FILTERS = ["All", ...PROVINCES] as const;
@@ -12,7 +12,7 @@ export default function ChildrenGrid() {
   const [activeProvince, setActiveProvince] = useState<string>("All");
   const { data: children, isLoading } = useCustomQuery({
     key: ["adoptions"],
-    queryFn: fetchChildren,
+    queryFn: getChildren,
   });
 
   const filteredChildren =

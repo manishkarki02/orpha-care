@@ -12,12 +12,12 @@ export const createDonation = async (
   return res.data.data;
 };
 
-export const fetchMyDonation = async (): Promise<Donation[]> => {
+export const getMyDonation = async (): Promise<Donation[]> => {
   const res = await api.get<ApiResponse<Donation[]>>("/donation/me");
   return res.data.data;
 };
 
-export const fetchAllDonation = async (): Promise<Donation[]> => {
+export const getAllDonation = async (): Promise<Donation[]> => {
   const res = await api.get<ApiResponse<Donation[]>>("/donation");
   return res.data.data;
 };

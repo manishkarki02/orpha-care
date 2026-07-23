@@ -62,7 +62,7 @@ router.post(
  * @swagger
  * /volunteer:
  *   get:
- *     summary: Fetch all volunteers
+ *     summary: Get all volunteers
  *     tags: [Volunteers]
  *     security:
  *       - bearerAuth: []
@@ -72,13 +72,13 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.get("/", accessTokenValidator, volunteerController.fetchAllVolunteers);
+router.get("/", accessTokenValidator, volunteerController.getAllVolunteers);
 
 /**
  * @swagger
  * /volunteer/{id}:
  *   get:
- *     summary: Fetch volunteer details
+ *     summary: Get volunteer details
  *     tags: [Volunteers]
  *     security:
  *       - bearerAuth: []
@@ -99,7 +99,7 @@ router.get(
 	"/:id",
 	accessTokenValidator,
 	validationMiddleware(volunteerRequestIdSchema),
-	volunteerController.fetchVolunteerDetail,
+	volunteerController.getVolunteerDetail,
 );
 
 /**

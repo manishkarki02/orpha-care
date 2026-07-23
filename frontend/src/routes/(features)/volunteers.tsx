@@ -1,6 +1,6 @@
 import VolunteerCard from "@/features/volunteers/components/VolunteerCard";
 import VolunteerCardSkeleton from "@/features/volunteers/components/VolunteerCardSkeleton";
-import { fetchVolunteers } from "@/features/volunteers/api";
+import { getVolunteers } from "@/features/volunteers/api";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/(features)/volunteers")({
 function VolunteersPage() {
   const { data: volunteers, isLoading } = useCustomQuery({
     key: ["volunteers"],
-    queryFn: fetchVolunteers,
+    queryFn: getVolunteers,
   });
 
   return (

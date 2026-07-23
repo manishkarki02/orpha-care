@@ -30,7 +30,7 @@ export const createVolunteer = async (
 };
 
 // Get all volunteers
-export const fetchAllVolunteers = async () => {
+export const getAllVolunteers = async () => {
 	const volunteers = await prisma.volunteer.findMany({
 		select: {
 			id: true,
@@ -44,7 +44,7 @@ export const fetchAllVolunteers = async () => {
 };
 
 // Get a single volunteer by ID
-export const fetchVolunteerById = async (id: string) => {
+export const getVolunteerById = async (id: string) => {
 	const volunteer = await prisma.volunteer.findUnique({
 		where: { id },
 		select: {

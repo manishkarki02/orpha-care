@@ -14,7 +14,7 @@ export const requestAdoption = async (
   return res.data.data;
 };
 
-export const fetchMyAdoptionRequests = async (): Promise<
+export const getMyAdoptionRequests = async (): Promise<
   AdoptionRequestItem[]
 > => {
   const res = await api.get<ApiResponse<AdoptionRequestItem[]>>(
@@ -23,7 +23,7 @@ export const fetchMyAdoptionRequests = async (): Promise<
   return res.data.data;
 };
 
-export const fetchPendingAdoptionRequests = async (): Promise<
+export const getPendingAdoptionRequests = async (): Promise<
   PendingAdoptionRequestItem[]
 > => {
   const res = await api.get<ApiResponse<PendingAdoptionRequestItem[]>>(

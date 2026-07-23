@@ -1,22 +1,22 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import { fetchMyReports } from "@/features/reports/api";
-import { fetchMyDonation } from "@/features/donation/api";
-import { fetchMyAdoptionRequests } from "@/features/adoption/api";
+import { getMyReports } from "@/features/reports/api";
+import { getMyDonation } from "@/features/donation/api";
+import { getMyAdoptionRequests } from "@/features/adoption/api";
 
 export default function UserDashboard() {
   const { data: reports, isLoading: reportsLoading } = useCustomQuery({
     key: ["reports", "me"],
-    queryFn: fetchMyReports,
+    queryFn: getMyReports,
   });
   const { data: donation, isLoading: donationLoading } = useCustomQuery({
     key: ["donation", "me"],
-    queryFn: fetchMyDonation,
+    queryFn: getMyDonation,
   });
   const { data: requests, isLoading: requestsLoading } = useCustomQuery({
     key: ["adoptions", "requests", "me"],
-    queryFn: fetchMyAdoptionRequests,
+    queryFn: getMyAdoptionRequests,
   });
 
   return (

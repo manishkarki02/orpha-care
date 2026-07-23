@@ -45,7 +45,7 @@ export const updateReportRequestSchema = z.object({
 	file: createReportRequestSchema.shape.file.optional(),
 });
 
-export const fetchReportDetailsRequestSchema = z.object({
+export const getReportDetailsRequestSchema = z.object({
 	params: z.object({
 		id: z.uuid("Invalid report ID"),
 	}),
@@ -53,4 +53,4 @@ export const fetchReportDetailsRequestSchema = z.object({
 
 export type CreateReportRequestSchema = z.infer<typeof createReportRequestSchema>;
 export type UpdateReportRequestSchema = z.infer<typeof updateReportRequestSchema>;
-export type FetchReportDetailsRequestSchema = z.infer<typeof fetchReportDetailsRequestSchema>;
+export type GetReportDetailsRequestSchema = z.infer<typeof getReportDetailsRequestSchema>;

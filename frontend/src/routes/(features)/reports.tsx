@@ -2,7 +2,7 @@
 import Modal from "@/common/components/Modal";
 import ReportCard from "@/features/reports/components/ReportCard";
 import ReportCardSkeleton from "@/features/reports/components/ReportCardSkeleton";
-import { fetchReports } from "@/features/reports/api";
+import { getReports } from "@/features/reports/api";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, MapPin, Plus, Upload, X } from "lucide-react";
@@ -17,7 +17,7 @@ function ReportsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: reports, isLoading } = useCustomQuery({
     key: ["reports"],
-    queryFn: fetchReports,
+    queryFn: getReports,
   });
 
   return (

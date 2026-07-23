@@ -5,11 +5,11 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import * as donationController from "@/features/donation/donation.controller";
 import { Role } from "@/generated/prisma/enums";
 import {
-  createDonationRequestSchema,
-  fetchDonationDetailRequestSchema,
-  fetchDonationsRequestSchema,
-  updateDonationRequestSchema,
-  updateDonationStatusRequestSchema,
+	createDonationRequestSchema,
+	getDonationDetailRequestSchema,
+	getDonationsRequestSchema,
+	updateDonationRequestSchema,
+	updateDonationStatusRequestSchema,
 } from "./donations.schema";
 
 const router = Router();
@@ -203,17 +203,17 @@ const router = Router();
  */
 
 router.post(
-  "/",
-  accessTokenValidator,
-  validationMiddleware(createDonationRequestSchema),
-  donationController.createDonation,
+	"/",
+	accessTokenValidator,
+	validationMiddleware(createDonationRequestSchema),
+	donationController.createDonation,
 );
 
 /**
  * @swagger
  * /donations:
  *   get:
- *     summary: Fetch all donations (admin only)
+ *     summary: Get all donations (admin only)
  *     description: Returns every non-deleted donation. Requires the `Admin` role.
  *     tags: [Donation]
  *     security:
@@ -242,18 +242,18 @@ router.post(
  *         $ref: '#/components/responses/Forbidden'
  */
 router.get(
-  "/",
-  accessTokenValidator,
-  requireRole(Role.Admin),
-  validationMiddleware(fetchDonationsRequestSchema),
-  donationController.fetchDonations,
+	"/",
+	accessTokenValidator,
+	requireRole(Role.Admin),
+	validationMiddleware(getDonationsRequestSchema),
+	donationController.getDonations,
 );
 
 /**
  * @swagger
  * /donations/me:
  *   get:
- *     summary: Fetch donations made by the current user
+ *     summary: Get donations made by the current user
  *     description: Returns the authenticated user's own non-deleted donations.
  *     tags: [Donation]
  *     security:
@@ -271,7 +271,7 @@ router.get(
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Donation fetched successfully.
+ *                   example: Donation retrieved successfully.
  *                 data:
  *                   type: array
  *                   items:
@@ -280,17 +280,17 @@ router.get(
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get(
-  "/me",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationsRequestSchema),
-  donationController.fetchMyDonations,
+	"/me",
+	accessTokenValidator,
+	validationMiddleware(getDonationsRequestSchema),
+	donationController.getMyDonations,
 );
 
 /**
  * @swagger
  * /donations/{id}:
  *   get:
- *     summary: Fetch donation details
+ *     summary: Get donation details
  *     description: Readable by the donation's owner or by an admin. Anyone else receives 403.
  *     tags: [Donation]
  *     security:
@@ -316,7 +316,7 @@ router.get(
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Donation detail fetched successfully.
+ *                   example: Donation detail retrieved successfully.
  *                 data:
  *                   $ref: '#/components/schemas/DonationDetail'
  *       400:
@@ -329,10 +329,10 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.get(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationDetailRequestSchema),
-  donationController.fetchDonationDetails,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(getDonationDetailRequestSchema),
+	donationController.getDonationDetails,
 );
 
 /**
@@ -413,10 +413,10 @@ router.get(
  *         $ref: '#/components/responses/NotFound'
  */
 router.patch(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(updateDonationRequestSchema),
-  donationController.updateDonation,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(updateDonationRequestSchema),
+	donationController.updateDonation,
 );
 
 /**
@@ -490,11 +490,11 @@ router.patch(
  *         $ref: '#/components/responses/NotFound'
  */
 router.patch(
-  "/:id/status",
-  accessTokenValidator,
-  requireRole(Role.Admin),
-  validationMiddleware(updateDonationStatusRequestSchema),
-  donationController.updateDonationStatus,
+	"/:id/status",
+	accessTokenValidator,
+	requireRole(Role.Admin),
+	validationMiddleware(updateDonationStatusRequestSchema),
+	donationController.updateDonationStatus,
 );
 
 /**
@@ -543,10 +543,10 @@ router.patch(
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete(
-  "/:id",
-  accessTokenValidator,
-  validationMiddleware(fetchDonationDetailRequestSchema),
-  donationController.deleteDonation,
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(getDonationDetailRequestSchema),
+	donationController.deleteDonation,
 );
 
 export default router;

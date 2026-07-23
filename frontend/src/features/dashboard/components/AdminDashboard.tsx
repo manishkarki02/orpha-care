@@ -1,30 +1,30 @@
 import useCustomQuery from "@/hooks/useCustomQuery";
-import { fetchPendingAdoptionRequests } from "@/features/adoption/api";
-import { fetchChildren } from "@/features/children/api";
-import { fetchReports } from "@/features/reports/api";
-import { fetchVolunteers } from "@/features/volunteers/api";
-import { fetchAllDonation } from "@/features/donation/api";
+import { getPendingAdoptionRequests } from "@/features/adoption/api";
+import { getChildren } from "@/features/children/api";
+import { getReports } from "@/features/reports/api";
+import { getVolunteers } from "@/features/volunteers/api";
+import { getAllDonation } from "@/features/donation/api";
 
 export default function AdminDashboard() {
   const { data: pendingRequests, isLoading: requestsLoading } = useCustomQuery({
     key: ["adoptions", "requests", "pending"],
-    queryFn: fetchPendingAdoptionRequests,
+    queryFn: getPendingAdoptionRequests,
   });
   const { data: children } = useCustomQuery({
     key: ["adoptions"],
-    queryFn: fetchChildren,
+    queryFn: getChildren,
   });
   const { data: reports } = useCustomQuery({
     key: ["reports"],
-    queryFn: fetchReports,
+    queryFn: getReports,
   });
   const { data: volunteers } = useCustomQuery({
     key: ["volunteers"],
-    queryFn: fetchVolunteers,
+    queryFn: getVolunteers,
   });
   const { data: donation } = useCustomQuery({
     key: ["donation"],
-    queryFn: fetchAllDonation,
+    queryFn: getAllDonation,
   });
 
   return (

@@ -28,8 +28,8 @@ export const createMissingReport: ValidatedRequestHandler<CreateReportRequestSch
 };
 
 //getting all missing reports except own
-export const fetchAllMissingReports: ValidatedRequestHandler = async (_req, res) => {
-	const missingReports = await reportService.fetchAllMissingReports(res.locals.userId);
+export const getAllMissingReports: ValidatedRequestHandler = async (_req, res) => {
+	const missingReports = await reportService.getAllMissingReports(res.locals.userId);
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,
 		message: "Got all missing report lists except own.",
@@ -38,22 +38,22 @@ export const fetchAllMissingReports: ValidatedRequestHandler = async (_req, res)
 };
 
 //get only my missing report
-export const fetchMyMissingReports: ValidatedRequestHandler = async (_req, res) => {
-	const myMissingReports = await reportService.fetchMyMissingReports(res.locals.userId);
+export const getMyMissingReports: ValidatedRequestHandler = async (_req, res) => {
+	const myMissingReports = await reportService.getMyMissingReports(res.locals.userId);
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,
-		message: "Fetched my missing reports successfully.",
+		message: "Retrieved my missing reports successfully.",
 		data: myMissingReports,
 	});
 };
 
 //getting a single missing report by id
-export const fetchMissingReportDetails: ValidatedRequestHandler = async (req, res) => {
-	const missingReportDetail = await reportService.fetchMissingReportDetails(req.params.id);
+export const getMissingReportDetails: ValidatedRequestHandler = async (req, res) => {
+	const missingReportDetail = await reportService.getMissingReportDetails(req.params.id);
 
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,
-		message: "Missing report details fetched successfully.",
+		message: "Missing report details retrieved successfully.",
 		data: missingReportDetail,
 	});
 };

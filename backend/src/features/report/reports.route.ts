@@ -5,7 +5,7 @@ import { upload } from "@/config/multer.config";
 import * as reportController from "@/features/report/report.controller";
 import {
 	createReportRequestSchema,
-	fetchReportDetailsRequestSchema,
+	getReportDetailsRequestSchema,
 	updateReportRequestSchema,
 } from "@/features/report/report.schema";
 
@@ -78,7 +78,7 @@ router.post(
  * @swagger
  * /reports:
  *   get:
- *     summary: Fetch all missing persons reports
+ *     summary: Get all missing persons reports
  *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
@@ -88,13 +88,13 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.get("/", accessTokenValidator, reportController.fetchAllMissingReports);
+router.get("/", accessTokenValidator, reportController.getAllMissingReports);
 
 /**
  * @swagger
  * /reports/me:
  *   get:
- *     summary: Fetch reports created by the current user
+ *     summary: Get reports created by the current user
  *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
@@ -104,13 +104,13 @@ router.get("/", accessTokenValidator, reportController.fetchAllMissingReports);
  *       401:
  *         description: Unauthorized
  */
-router.get("/me", accessTokenValidator, reportController.fetchMyMissingReports);
+router.get("/me", accessTokenValidator, reportController.getMyMissingReports);
 
 /**
  * @swagger
  * /reports/{id}:
  *   get:
- *     summary: Fetch report details
+ *     summary: Get report details
  *     tags: [Reports]
  *     security:
  *       - bearerAuth: []
@@ -130,8 +130,8 @@ router.get("/me", accessTokenValidator, reportController.fetchMyMissingReports);
 router.get(
 	"/:id",
 	accessTokenValidator,
-	validationMiddleware(fetchReportDetailsRequestSchema),
-	reportController.fetchMissingReportDetails,
+	validationMiddleware(getReportDetailsRequestSchema),
+	reportController.getMissingReportDetails,
 );
 
 /**
@@ -210,7 +210,7 @@ router.patch(
 router.delete(
 	"/:id",
 	accessTokenValidator,
-	validationMiddleware(fetchReportDetailsRequestSchema),
+	validationMiddleware(getReportDetailsRequestSchema),
 	reportController.deleteMissingReport,
 );
 

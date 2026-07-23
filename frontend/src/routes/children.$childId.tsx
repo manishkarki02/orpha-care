@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import ChildDetails from "@/features/children/components/ChildDetails";
 import ChildDetailsSkeleton from "@/features/children/components/ChildDetailsSkeleton";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import { fetchChildById } from "@/features/children/api";
+import { getChildById } from "@/features/children/api";
 
 export const Route = createFileRoute("/children/$childId")({
   component: ChildDetailsPage,
@@ -12,7 +12,7 @@ function ChildDetailsPage() {
   const { childId } = Route.useParams();
   const { data: child, isLoading, isError } = useCustomQuery({
     key: ["adoptions", childId],
-    queryFn: () => fetchChildById(childId),
+    queryFn: () => getChildById(childId),
   });
 
   if (isLoading) {

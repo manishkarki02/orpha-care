@@ -21,25 +21,25 @@ export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSche
 	});
 };
 
-export const fetchAllVolunteers: ValidatedRequestHandler = async (_req, res) => {
-	const volunteers = await volunteerService.fetchAllVolunteers();
+export const getAllVolunteers: ValidatedRequestHandler = async (_req, res) => {
+	const volunteers = await volunteerService.getAllVolunteers();
 
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,
-		message: "Volunteers fetched successfully",
+		message: "Volunteers retrieved successfully",
 		data: volunteers,
 	});
 };
 
-export const fetchVolunteerDetail: ValidatedRequestHandler<VolunteerRequestIdSchema> = async (
+export const getVolunteerDetail: ValidatedRequestHandler<VolunteerRequestIdSchema> = async (
 	req,
 	res,
 ) => {
-	const volunteer = await volunteerService.fetchVolunteerById(req.params.id);
+	const volunteer = await volunteerService.getVolunteerById(req.params.id);
 
 	return ApiResponse.success(res, {
 		statusCode: HttpStatus.OK,
-		message: "Volunteer detail fetched successfully",
+		message: "Volunteer detail retrieved successfully",
 		data: volunteer,
 	});
 };

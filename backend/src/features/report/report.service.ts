@@ -39,7 +39,7 @@ export const createMissingReport = async (
 	return missingReport;
 };
 
-export const fetchAllMissingReports = async (reporterId: string) => {
+export const getAllMissingReports = async (reporterId: string) => {
 	const missingReports = await prisma.missingReport.findMany({
 		where: {
 			reporterId: { not: reporterId },
@@ -66,7 +66,7 @@ export const fetchAllMissingReports = async (reporterId: string) => {
 	return missingReports;
 };
 
-export const fetchMyMissingReports = async (reporterId: string) => {
+export const getMyMissingReports = async (reporterId: string) => {
 	const getMyMissingReports = await prisma.missingReport.findMany({
 		where: {
 			reporterId,
@@ -92,7 +92,7 @@ export const fetchMyMissingReports = async (reporterId: string) => {
 	return getMyMissingReports;
 };
 
-export const fetchMissingReportDetails = async (id: string) => {
+export const getMissingReportDetails = async (id: string) => {
 	const missingReport = await prisma.missingReport.findUnique({
 		where: {
 			id: id,
