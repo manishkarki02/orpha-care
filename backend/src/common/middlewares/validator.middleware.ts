@@ -19,6 +19,7 @@ export const validationMiddleware = (schema: CombinedSchema) => {
 				params: req.params,
 				query: req.query,
 				body: req.body,
+				file: req.file,
 			});
 
 			if (!result.success) {

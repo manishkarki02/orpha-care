@@ -10,10 +10,12 @@ export interface QueryBuilderConfig {
 	filters?: string[];
 
 	/**
-	 * Date ranges keyed by the Prisma field they target. The tuple is
-	 * `[fromQueryKey, toQueryKey]`, producing `where[field] = { gte?, lte? }`.
+	 * Bounded ranges keyed by the Prisma field they target. The tuple is
+	 * `[minQueryKey, maxQueryKey]`, producing `where[field] = { gte?, lte? }`.
+	 * Works for any comparable scalar — `Int` (e.g. age), `Decimal`, or
+	 * `DateTime` (e.g. createdAt) — since `gte`/`lte` is type-agnostic.
 	 */
-	dateRanges?: Record<string, [fromKey: string, toKey: string]>;
+	ranges?: Record<string, [minKey: string, maxKey: string]>;
 
 	/**
 	 * Dotted paths that a free-text `q` fans out over, e.g. `"donor.name"`
@@ -95,15 +97,15 @@ export default function buildPrismaQuery(
 		}
 	}
 
-	// 2. Date ranges
-	for (const [field, [fromKey, toKey]] of Object.entries(config.dateRanges ?? {})) {
-		const from = query[fromKey];
-		const to = query[toKey];
-		if (from === undefined && to === undefined) continue;
+	// 2. Bounded ranges (numbers or dates) -> { gte?, lte? }
+	for (const [field, [minKey, maxKey]] of Object.entries(config.ranges ?? {})) {
+		const min = query[minKey];
+		const max = query[maxKey];
+		if (min === undefined && max === undefined) continue;
 
 		where[field] = {
-			...(from !== undefined && { gte: from }),
-			...(to !== undefined && { lte: to }),
+			...(min !== undefined && { gte: min }),
+			...(max !== undefined && { lte: max }),
 		};
 	}
 
