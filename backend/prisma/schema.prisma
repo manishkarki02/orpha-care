@@ -132,22 +132,22 @@ model KidsForAdoption {
   id String @id @default(uuid())
 
   // Profile
-  picture     String?
+  image       String?
   name        String
-  age         Int
+  dob         DateTime
   gender      Gender
   province    Province
   description String
 
   // Adoption state
-  isAdopted Boolean @default(false) @map("is_adopted")
+  isAdopted Boolean? @default(false) @map("is_adopted")
 
   adopterId String? @map("adopter_id")
   adopter   User?   @relation("KidAdopter", fields: [adopterId], references: [id])
 
   // Audit
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   createdById String  @map("created_by_id")
