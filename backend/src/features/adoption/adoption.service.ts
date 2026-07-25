@@ -1,128 +1,88 @@
 import { sendMail } from "@/common/services/mail.service";
 import {
-	AuthorizationError,
+	BadRequestError,
 	ConflictError,
 	InternalServerError,
 	NotFoundError,
 } from "@/common/utils/errorClass.utils";
-import Environment from "@/config/env.config";
 import prisma from "@/db";
-import type {
-	CreateAdoptionRequestSchema,
-	FetchAdoptionRequestsSchema,
-	UpdateAdoptionRequestSchema,
-} from "@/features/adoption/adoption.schema";
-import { Role } from "@/generated/prisma/enums";
+import type { CreateAdoptionRequestSchema } from "@/features/adoption/adoption.schema";
+import { AdoptionRequestStatus } from "@/generated/prisma/enums";
 
-// Create a new kid for adoption
-export const createAdoptionKid = async (
+// -- Create Adoption Request
+export const createAdoptionRequest = async (
+	userId: string,
 	body: CreateAdoptionRequestSchema["body"],
-	role: string,
-	file: CreateAdoptionRequestSchema["file"],
 ) => {
-	if (role !== Role.Admin) {
-		throw new AuthorizationError("You are not authorized to create the kids for adoption.");
-	}
+	const createdRequest = await prisma.$transaction(async (tx) => {
+		const foundKid = await tx.kidsForAdoption.findUnique({
+			where: {
+				id: body.kidId,
+				deletedAt: null,
+			},
+		});
+		if (!foundKid) {
+			throw new NotFoundError("Kid not found.");
+		} else if (foundKid.isAdopted) {
+			throw new ConflictError("Kid is already adopted.");
+		}
 
-	let imageUrl = null;
-	if (file) {
-		imageUrl = `${Environment.get("API_URL")}/uploads/${file.filename}`;
-	}
+		const existingRequest = await tx.adoptionRequest.findFirst({
+			where: {
+				adopterId: userId,
+				status: {
+					in: [AdoptionRequestStatus.Pending, AdoptionRequestStatus.UnderReview],
+				},
+				deletedAt: null,
+			},
+		});
+		if (existingRequest) {
+			throw new ConflictError(
+				"You already have an adoption request that is pending or under review.",
+			);
+		}
 
-	const kid = await prisma.kidsForAdoption.create({
-		data: {
-			picture: imageUrl,
-			name: body.name,
-			surname: body.surName,
-			age: body.age,
-			gender: body.gender,
-			province: body.province,
-			description: body.description,
-		},
+		return await tx.adoptionRequest.create({
+			data: {
+				kidId: body.kidId,
+				adopterId: userId,
+				createdById: userId,
+			},
+			select: {
+				id: true,
+				kid: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				adopter: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+				status: true,
+				createdAt: true,
+				createdBy: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		});
 	});
-	if (!kid) {
-		throw new InternalServerError("Failed to create kid for adoption.");
-	}
 
-	return kid;
+	//  Convert this to queue
+	await sendMail(createdRequest.adopter.email, createdRequest.kid.name);
+
+	return createdRequest;
 };
 
-// Get all kids for adoption
-export const fetchAllAdoptionKids = async (query: FetchAdoptionRequestsSchema["query"]) => {
-	const queryFilter: { [key: string]: unknown } = {};
-	if (query.gender) {
-		queryFilter.gender = query.gender;
-	}
-
-	if (query.minAge || query.maxAge) {
-		queryFilter.age = {
-			...(query.minAge && { gte: query.minAge }),
-			...(query.maxAge && { lte: query.maxAge }),
-		};
-	}
-
-	const kids = await prisma.kidsForAdoption.findMany({
-		where: {
-			isAdopted: false,
-			...queryFilter,
-		},
-	});
-
-	return kids;
-};
-
-// Get a single kid by ID
-export const fetchAdoptionKidById = async (id: string) => {
-	const kid = await prisma.kidsForAdoption.findUnique({
-		where: { id },
-	});
-
-	if (!kid) {
-		throw new NotFoundError("Kid not found.");
-	}
-	return kid;
-};
-
-// Update a kid's details
-export const updateAdoptionKid = async (
-	id: string,
-	data: UpdateAdoptionRequestSchema["body"],
-	file: UpdateAdoptionRequestSchema["file"],
-) => {
-	const existingKid = await prisma.kidsForAdoption.findUnique({
-		where: { id, isAdopted: false },
-	});
-	if (!existingKid) {
-		throw new NotFoundError("Kid not found.");
-	}
-
-	let imageUrl = null;
-	if (file) {
-		imageUrl = `${Environment.get("API_URL")}/uploads/${file.filename}`;
-	}
-
-	const updatedKid = await prisma.kidsForAdoption.update({
-		where: { id },
-		data: {
-			picture: imageUrl,
-			name: data.name,
-			surname: data.surName,
-			age: data.age,
-			gender: data.gender,
-			province: data.province,
-			description: data.description,
-		},
-	});
-
-	if (!updatedKid) {
-		throw new InternalServerError("Failed to update kid for adoption.");
-	}
-
-	return updatedKid;
-};
-
-// Get the current user's own adoption requests
-export const fetchMyAdoptionRequests = async (adopterId: string) => {
+// -- Get the current user's own adoption requests
+export const getMyAdoptionRequests = async (adopterId: string) => {
 	const requests = await prisma.adoptionRequest.findMany({
 		where: { adopterId },
 		include: { kid: true },
@@ -131,8 +91,8 @@ export const fetchMyAdoptionRequests = async (adopterId: string) => {
 	return requests;
 };
 
-// Get all pending adoption requests (kids not yet adopted) — ADMIN only
-export const fetchPendingAdoptionRequests = async () => {
+// -- Get all pending adoption requests (kids not yet adopted) — ADMIN only
+export const getPendingAdoptionRequests = async () => {
 	const requests = await prisma.adoptionRequest.findMany({
 		where: { kid: { isAdopted: false } },
 		include: {
@@ -144,21 +104,7 @@ export const fetchPendingAdoptionRequests = async () => {
 	return requests;
 };
 
-// Delete a kid by ID
-export const deleteAdoptionKid = async (id: string) => {
-	const existingKid = await prisma.kidsForAdoption.findUnique({
-		where: { id },
-	});
-	if (!existingKid) {
-		throw new NotFoundError("Kid not found.");
-	}
-	await prisma.kidsForAdoption.delete({
-		where: { id },
-	});
-	return;
-};
-
-// Request for adoption
+// -- Request for adoption
 export const requestForAdoption = async (kidId: string, adopterId: string) => {
 	const existingKid = await prisma.kidsForAdoption.findUnique({
 		where: { id: kidId },
