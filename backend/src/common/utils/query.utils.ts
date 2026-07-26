@@ -117,10 +117,16 @@ export default function buildPrismaQuery(
 	}
 
 	// 4. Sort + pagination
+	const defaultSort = config.defaultSort ?? { createdAt: DEFAULT_ORDER };
 	const orderBy: Record<string, Order> =
 		query.sortBy !== undefined
 			? { [query.sortBy]: query.order ?? DEFAULT_ORDER }
-			: (config.defaultSort ?? { createdAt: DEFAULT_ORDER });
+			: Object.fromEntries(
+					Object.entries(defaultSort).map(([field, direction]) => [
+						field,
+						query.order ?? direction,
+					]),
+				);
 
 	const page = query.page ?? DEFAULT_PAGE;
 	const limit = query.limit ?? DEFAULT_LIMIT;

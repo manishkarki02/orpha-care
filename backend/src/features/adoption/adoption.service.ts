@@ -2,11 +2,15 @@ import { sendMail } from "@/common/services/mail.service";
 import { ConflictError, NotFoundError } from "@/common/utils/errorClass.utils";
 import buildPrismaQuery from "@/common/utils/query.utils";
 import { buildPaginationMetaData } from "@/common/utils/response.utils";
-import { allAdoptionRequestsQueryConfig } from "@/config/query.config";
+import {
+	allAdoptionRequestsQueryConfig,
+	myAdoptionRequestsQueryConfig,
+} from "@/config/query.config";
 import prisma from "@/db";
 import type {
 	CreateAdoptionRequestSchema,
 	GetAllAdoptionRequestSchema,
+	GetMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
 import { Prisma } from "@/generated/prisma/client";
 import { AdoptionRequestStatus } from "@/generated/prisma/enums";
@@ -191,6 +195,50 @@ export const getAllAdoptionRequests = async (query: GetAllAdoptionRequestSchema[
 		prisma.adoptionRequest.count({ where: finalWhere }),
 	]);
 
+	return {
+		data: requests,
+		pagination: buildPaginationMetaData({ page: query.page, limit: query.limit, total }),
+	};
+};
+
+// -- Get My Adoption Requests
+export const getMyAdoptionRequests = async (
+	adopterId: string,
+	query: GetMyAdoptionRequestsSchema["query"],
+) => {
+	const { where, take, skip, orderBy } = buildPrismaQuery(query, myAdoptionRequestsQueryConfig);
+
+	const finalWhere = { ...where, deletedAt: null, adopterId };
+	const [requests, total] = await prisma.$transaction([
+		prisma.adoptionRequest.findMany({
+			where: finalWhere,
+			take,
+			skip,
+			orderBy,
+			select: {
+				id: true,
+				status: true,
+				kid: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+				createdAt: true,
+				updatedAt: true,
+				updatedBy: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		}),
+		prisma.adoptionRequest.count({
+			where: finalWhere,
+		}),
+	]);
 	return {
 		data: requests,
 		pagination: buildPaginationMetaData({ page: query.page, limit: query.limit, total }),

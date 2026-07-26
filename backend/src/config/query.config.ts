@@ -23,8 +23,14 @@ export const kidsQueryConfig = {
 } satisfies QueryBuilderConfig;
 
 export const allAdoptionRequestsQueryConfig = {
-	filters: ["status"],
+	filters: ["status", "kidId", "adopterId"],
 	ranges: { createdAt: ["fromDate", "toDate"] },
 	searchable: ["kid.name", "adopter.name"],
+	defaultSort: { createdAt: Order.DESC },
+} satisfies QueryBuilderConfig;
+
+export const myAdoptionRequestsQueryConfig = {
+	filters: ["status"],
+	searchable: ["kid.name"],
 	defaultSort: { createdAt: Order.DESC },
 } satisfies QueryBuilderConfig;

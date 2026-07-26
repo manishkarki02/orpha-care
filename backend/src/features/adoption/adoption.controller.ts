@@ -4,6 +4,7 @@ import { paginatedResponse, successResponse } from "@/common/utils/response.util
 import type {
 	CreateAdoptionRequestSchema,
 	GetAllAdoptionRequestSchema,
+	GetMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
 import * as adoptionService from "./adoption.service";
 
@@ -34,6 +35,24 @@ export const getAllAdoptionRequests: ValidatedRequestHandler<GetAllAdoptionReque
 	return paginatedResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Adoption Requests fetched successfully.",
+		data,
+		pagination,
+	});
+};
+
+// -- Get My Adoption Requests
+export const getMyAdoptionRequests: ValidatedRequestHandler<GetMyAdoptionRequestsSchema> = async (
+	req,
+	res,
+) => {
+	const { data, pagination } = await adoptionService.getMyAdoptionRequests(
+		res.locals.userId,
+		req.query,
+	);
+
+	return paginatedResponse(res, {
+		statusCode: HttpStatus.OK,
+		message: "Adoption requests fetched successfully.",
 		data,
 		pagination,
 	});

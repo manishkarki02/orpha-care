@@ -30,6 +30,9 @@ export const getAllAdoptionRequestSchema = z.object({
 				.date("Invalid to date")
 				.transform((d) => d.toISOString())
 				.optional(),
+
+			kidId: z.uuidv4("Invalid Kid Id").optional(),
+			adopterId: z.uuidv4("Invalid Adopter Id").optional(),
 		})
 		.refine(
 			(data) => !data.fromDate || !data.toDate || new Date(data.fromDate) <= new Date(data.toDate),

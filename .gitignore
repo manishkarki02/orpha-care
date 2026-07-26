@@ -1,3 +1,4 @@
 
 # Local-only scratch/plan notes
 *.local.md
+.vscode

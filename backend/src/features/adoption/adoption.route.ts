@@ -6,6 +6,7 @@ import * as adoptionController from "@/features/adoption/adoption.controller";
 import {
 	createAdoptionRequestSchema,
 	getAllAdoptionRequestSchema,
+	getMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
 import { Role } from "@/generated/prisma/enums";
 
@@ -96,6 +97,8 @@ const router = Router();
  *         description: Validation error
  *       401:
  *         description: Unauthorized
+ *       403:
+ *         description: Forbidden — User role required
  *       404:
  *         description: Kid not found
  *       409:
@@ -105,6 +108,7 @@ const router = Router();
 router.post(
 	"/",
 	accessTokenValidator,
+	requireRole(Role.User),
 	validationMiddleware(createAdoptionRequestSchema),
 	adoptionController.createAdoptionRequest,
 );
@@ -152,6 +156,18 @@ router.post(
  *         schema:
  *           type: string
  *           enum: [Pending, UnderReview, Approved, Rejected, Cancelled]
+ *       - in: query
+ *         name: kidId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Filter requests for a specific kid
+ *       - in: query
+ *         name: adopterId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Filter requests from a specific adopter
  *       - in: query
  *         name: fromDate
  *         schema:
@@ -250,6 +266,8 @@ router.post(
  *                     hasPrev:
  *                       type: boolean
  *                       example: false
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Unauthorized
  *       403:
@@ -261,6 +279,134 @@ router.get(
 	requireRole(Role.Admin),
 	validationMiddleware(getAllAdoptionRequestSchema),
 	adoptionController.getAllAdoptionRequests,
+);
+
+/**
+ * @swagger
+ * /adoption-requests/me:
+ *   get:
+ *     summary: Get my adoption requests
+ *     description: Returns a paginated list of non-deleted adoption requests created by the authenticated user.
+ *     tags: [Adoption Requests]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 150
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 5
+ *           maximum: 100
+ *         description: Must be a multiple of 5
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search by kid name
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [Pending, UnderReview, Approved, Rejected, Cancelled]
+ *     responses:
+ *       200:
+ *         description: Paginated adoption requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Adoption requests fetched successfully.
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       status:
+ *                         type: string
+ *                         enum: [Pending, UnderReview, Approved, Rejected, Cancelled]
+ *                       kid:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           name:
+ *                             type: string
+ *                           image:
+ *                             type: string
+ *                             nullable: true
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedBy:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           name:
+ *                             type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     total:
+ *                       type: integer
+ *                       example: 3
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 1
+ *                     hasNext:
+ *                       type: boolean
+ *                       example: false
+ *                     hasPrev:
+ *                       type: boolean
+ *                       example: false
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden — User role required
+ */
+router.get(
+	"/me",
+	accessTokenValidator,
+	requireRole(Role.User),
+	validationMiddleware(getMyAdoptionRequestsSchema),
+	adoptionController.getMyAdoptionRequests,
 );
 
 export default router;
