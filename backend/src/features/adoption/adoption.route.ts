@@ -5,6 +5,7 @@ import { validationMiddleware } from "@/common/middlewares/validator.middleware"
 import * as adoptionController from "@/features/adoption/adoption.controller";
 import {
 	createAdoptionRequestSchema,
+	getAdoptionRequestDetailsSchema,
 	getAllAdoptionRequestSchema,
 	getMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
@@ -407,6 +408,166 @@ router.get(
 	requireRole(Role.User),
 	validationMiddleware(getMyAdoptionRequestsSchema),
 	adoptionController.getMyAdoptionRequests,
+);
+
+/**
+ * @swagger
+ * /adoption-requests/{id}:
+ *   get:
+ *     summary: Get adoption request details
+ *     description: Returns one non-deleted adoption request. Users can only access their own request; volunteers can only access requests assigned to them; admins receive full operational details.
+ *     tags: [Adoption Requests]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Adoption request detail retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Adoption request detail fetched successfully.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     status:
+ *                       type: string
+ *                       enum: [Pending, UnderReview, Approved, Rejected, Cancelled]
+ *                     kid:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *                           nullable: true
+ *                         dob:
+ *                           type: string
+ *                           format: date-time
+ *                         gender:
+ *                           type: string
+ *                           enum: [Male, Female, Other]
+ *                         province:
+ *                           type: string
+ *                           enum: [Koshi, Madhesh, Bagmati, Gandaki, Lumbini, Karnali, SudurPachim]
+ *                         description:
+ *                           type: string
+ *                     adopter:
+ *                       type: object
+ *                       nullable: true
+ *                       description: Included for admins and assigned volunteers. Admins also receive image and email.
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *                           nullable: true
+ *                           description: Included for admins only
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                           description: Included for admins only
+ *                         phone:
+ *                           type: string
+ *                         address:
+ *                           type: string
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedBy:
+ *                       type: object
+ *                       nullable: true
+ *                       description: Included for admins only
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *                           nullable: true
+ *                     tasks:
+ *                       type: array
+ *                       nullable: true
+ *                       description: Admins receive all tasks with volunteer details; assigned volunteers receive only their own task without volunteer details.
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           volunteer:
+ *                             type: object
+ *                             nullable: true
+ *                             description: Included for admins only
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 format: uuid
+ *                               name:
+ *                                 type: string
+ *                               image:
+ *                                 type: string
+ *                                 nullable: true
+ *                           status:
+ *                             type: string
+ *                             enum: [Pending, InProgress, Submitted, Completed]
+ *                           result:
+ *                             type: string
+ *                             nullable: true
+ *                             enum: [Suitable, NeedsReview, NotSuitable, PossibleMatch, NotFound, Found]
+ *                           remarks:
+ *                             type: string
+ *                             nullable: true
+ *                           dueDate:
+ *                             type: string
+ *                             format: date-time
+ *                             nullable: true
+ *                           images:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Adoption request not found or not accessible to the authenticated user
+ */
+router.get(
+	"/:id",
+	accessTokenValidator,
+	validationMiddleware(getAdoptionRequestDetailsSchema),
+	adoptionController.getAdoptionRequestDetails,
 );
 
 export default router;

@@ -3,6 +3,7 @@ import type { ValidatedRequestHandler } from "@/common/types";
 import { paginatedResponse, successResponse } from "@/common/utils/response.utils";
 import type {
 	CreateAdoptionRequestSchema,
+	GetAdoptionRequestDetailsSchema,
 	GetAllAdoptionRequestSchema,
 	GetMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
@@ -55,5 +56,21 @@ export const getMyAdoptionRequests: ValidatedRequestHandler<GetMyAdoptionRequest
 		message: "Adoption requests fetched successfully.",
 		data,
 		pagination,
+	});
+};
+
+// -- Get Adoption Requests Detail
+export const getAdoptionRequestDetails: ValidatedRequestHandler<
+	GetAdoptionRequestDetailsSchema
+> = async (req, res) => {
+	const data = await adoptionService.getAdoptionRequestDetails(req.params.id, {
+		id: res.locals.userId,
+		role: res.locals.role,
+	});
+
+	return successResponse(res, {
+		statusCode: HttpStatus.OK,
+		message: "Adoption request detail fetched successfully.",
+		data,
 	});
 };

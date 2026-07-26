@@ -12,7 +12,7 @@ import type {
 	GetAllAdoptionRequestSchema,
 	GetMyAdoptionRequestsSchema,
 } from "@/features/adoption/adoption.schema";
-import { AdoptionRequestStatus } from "@/generated/prisma/enums";
+import { AdoptionRequestStatus, Role } from "@/generated/prisma/enums";
 import type { CreatedAdoptionRequest } from "./adoption.type";
 import { throwIfActiveRequestConflict } from "./adoption.utils";
 
@@ -194,4 +194,101 @@ export const getMyAdoptionRequests = async (
 		data: requests,
 		pagination: buildPaginationMetaData({ page: query.page, limit: query.limit, total }),
 	};
+};
+
+// -- Get Adoption Request Details
+export const getAdoptionRequestDetails = async (id: string, user: { id: string; role: Role }) => {
+	const isAdmin = user.role === Role.Admin;
+	const isVolunteer = user.role === Role.Volunteer;
+
+	const adoptionRequest = await prisma.adoptionRequest.findFirst({
+		where: {
+			id,
+			deletedAt: null,
+			...(user.role === Role.User ? { adopterId: user.id } : {}),
+			...(isVolunteer
+				? {
+						tasks: {
+							some: {
+								volunteerId: user.id,
+								deletedAt: null,
+							},
+						},
+					}
+				: {}),
+		},
+		select: {
+			id: true,
+			status: true,
+			kid: {
+				select: {
+					id: true,
+					name: true,
+					image: true,
+					dob: true,
+					gender: true,
+					province: true,
+					description: true,
+				},
+			},
+			adopter: (isAdmin || isVolunteer) && {
+				select: {
+					id: true,
+					name: true,
+					phone: true,
+					address: true,
+					...(isAdmin ? { image: true, email: true } : {}),
+				},
+			},
+			createdAt: true,
+			updatedAt: true,
+			updatedBy: isAdmin && {
+				select: {
+					id: true,
+					name: true,
+					image: true,
+				},
+			},
+			tasks: isAdmin
+				? {
+						select: {
+							id: true,
+							volunteer: {
+								select: {
+									name: true,
+									id: true,
+									image: true,
+								},
+							},
+							status: true,
+							result: true,
+							remarks: true,
+							dueDate: true,
+							images: true,
+						},
+					}
+				: isVolunteer
+					? {
+							where: {
+								volunteerId: user.id,
+								deletedAt: null,
+							},
+							select: {
+								id: true,
+								status: true,
+								result: true,
+								remarks: true,
+								dueDate: true,
+								images: true,
+							},
+						}
+					: false,
+		},
+	});
+
+	if (!adoptionRequest) {
+		throw new NotFoundError("Adoption request not found.");
+	}
+
+	return adoptionRequest;
 };
