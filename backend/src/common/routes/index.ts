@@ -11,7 +11,7 @@ const router = Router();
 router.use("/auth", authRoutes);
 router.use("/reports", reportRoutes);
 router.use("/donations", donationRoutes);
-router.use("/adoptions", adoptionRoutes);
+router.use("/adoption-requests", adoptionRoutes);
 router.use("/volunteers", volunteerRoutes);
 router.use("/kids", kidsRoutes);
 

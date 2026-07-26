@@ -36,3 +36,24 @@ export function paginatedResponse<T>(
 
 	res.status(statusCode).json(response);
 }
+
+export const buildPaginationMetaData = ({
+	page = 1,
+	limit = 10,
+	total,
+}: {
+	page?: number;
+	limit?: number;
+	total: number;
+}) => {
+	const totalPages = Math.ceil(total / limit);
+
+	return {
+		page,
+		limit,
+		total,
+		totalPages,
+		hasNext: page < totalPages,
+		hasPrev: page > 1,
+	};
+};

@@ -1,7 +1,13 @@
 import { sendMail } from "@/common/services/mail.service";
 import { ConflictError, NotFoundError } from "@/common/utils/errorClass.utils";
+import buildPrismaQuery from "@/common/utils/query.utils";
+import { buildPaginationMetaData } from "@/common/utils/response.utils";
+import { allAdoptionRequestsQueryConfig } from "@/config/query.config";
 import prisma from "@/db";
-import type { CreateAdoptionRequestSchema } from "@/features/adoption/adoption.schema";
+import type {
+	CreateAdoptionRequestSchema,
+	GetAllAdoptionRequestSchema,
+} from "@/features/adoption/adoption.schema";
 import { Prisma } from "@/generated/prisma/client";
 import { AdoptionRequestStatus } from "@/generated/prisma/enums";
 
@@ -145,30 +151,48 @@ export const createAdoptionRequest = async (
 	return createdRequest;
 };
 
-// -- Get the current user's own adoption requests
-export const getMyAdoptionRequests = async (adopterId: string) => {
-	const requests = await prisma.adoptionRequest.findMany({
-		where: { adopterId },
-		include: { kid: true },
-	});
+// -- Get All Adoption Requests
+export const getAllAdoptionRequests = async (query: GetAllAdoptionRequestSchema["query"]) => {
+	const { where, take, skip, orderBy } = buildPrismaQuery(query, allAdoptionRequestsQueryConfig);
+	const finalWhere = { ...where, deletedAt: null };
+	const [requests, total] = await prisma.$transaction([
+		prisma.adoptionRequest.findMany({
+			where: finalWhere,
+			take,
+			skip,
+			orderBy,
+			select: {
+				id: true,
+				status: true,
+				kid: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+				adopter: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+				createdAt: true,
+				updatedAt: true,
+				updatedBy: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+			},
+		}),
+		prisma.adoptionRequest.count({ where: finalWhere }),
+	]);
 
-	return requests;
-};
-
-// -- Get all pending adoption requests (kids not yet adopted) — ADMIN only
-export const getPendingAdoptionRequests = async () => {
-	const requests = await prisma.adoptionRequest.findMany({
-		where: { kid: { isAdopted: false } },
-		include: {
-			kid: true,
-			adopter: { select: { id: true, name: true, email: true, phone: true } },
-		},
-	});
-
-	return requests;
-};
-
-// -- Request for adoption
-export const requestForAdoption = async (kidId: string, adopterId: string) => {
-	return createAdoptionRequest(adopterId, { kidId });
+	return {
+		data: requests,
+		pagination: buildPaginationMetaData({ page: query.page, limit: query.limit, total }),
+	};
 };

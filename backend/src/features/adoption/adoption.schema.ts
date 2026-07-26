@@ -19,8 +19,8 @@ export const getMyAdoptionRequestsSchema = z.object({
 export const getAllAdoptionRequestSchema = z.object({
 	query: z
 		.object({
-			...getMyAdoptionRequestsSchema.shape.query,
-			sortBy: z.enum(["createdAt", "adoptor"], "Invalid sort by value").optional(),
+			...getMyAdoptionRequestsSchema.shape.query.shape,
+			sortBy: z.enum(["createdAt", "status"], "Invalid sort by value").optional(),
 
 			fromDate: z.coerce
 				.date("Invalid from date")

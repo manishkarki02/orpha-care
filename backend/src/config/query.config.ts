@@ -21,3 +21,10 @@ export const kidsQueryConfig = {
 	searchable: ["name"],
 	defaultSort: { createdAt: Order.DESC },
 } satisfies QueryBuilderConfig;
+
+export const allAdoptionRequestsQueryConfig = {
+	filters: ["status"],
+	ranges: { createdAt: ["fromDate", "toDate"] },
+	searchable: ["kid.name", "adopter.name"],
+	defaultSort: { createdAt: Order.DESC },
+} satisfies QueryBuilderConfig;
