@@ -8,6 +8,7 @@ import {
 	getAdoptionRequestDetailsSchema,
 	getAllAdoptionRequestSchema,
 	getMyAdoptionRequestsSchema,
+	updateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
 import { Role } from "@/generated/prisma/enums";
 
@@ -568,6 +569,127 @@ router.get(
 	accessTokenValidator,
 	validationMiddleware(getAdoptionRequestDetailsSchema),
 	adoptionController.getAdoptionRequestDetails,
+);
+
+/**
+ * @swagger
+ * /adoption-requests/{id}/status:
+ *   patch:
+ *     summary: Update adoption request status
+ *     description: Updates the status of an adoption request. Admins can approve or reject requests; users can cancel only their own request.
+ *     tags: [Adoption Requests]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Approved, Rejected, Cancelled]
+ *                 description: Approved and Rejected are admin-only. Cancelled is user-only for the request owner.
+ *           examples:
+ *             approve:
+ *               summary: Approve request
+ *               value:
+ *                 status: Approved
+ *             reject:
+ *               summary: Reject request
+ *               value:
+ *                 status: Rejected
+ *             cancel:
+ *               summary: Cancel request
+ *               value:
+ *                 status: Cancelled
+ *     responses:
+ *       200:
+ *         description: Adoption request status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Adoption request status updated successfully.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     status:
+ *                       type: string
+ *                       enum: [Pending, UnderReview, Approved, Rejected, Cancelled]
+ *                     kid:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *                           nullable: true
+ *                     adopter:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedBy:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
+ *       400:
+ *         description: Validation error or invalid status transition
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden — Admin role required for approval/rejection; request owner required for cancellation
+ *       404:
+ *         description: Adoption request not found or not accessible to the authenticated user
+ *       409:
+ *         description: Request cannot be updated because of its current state or a conflicting approved request
+ */
+router.patch(
+	"/:id/status",
+	accessTokenValidator,
+	requireRole(Role.Admin, Role.User),
+	validationMiddleware(updateAdoptionRequestSchema),
+	adoptionController.updateAdoptionRequestStatus,
 );
 
 export default router;

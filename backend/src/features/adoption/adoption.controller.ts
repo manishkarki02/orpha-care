@@ -77,5 +77,18 @@ export const getAdoptionRequestDetails: ValidatedRequestHandler<
 };
 
 // -- Update Adoption Request Status (Admin, User)
-export const updateAdoptionRequestStatus: ValidatedRequestHandler<UpdateAdoptionRequestSchema> = async (req, res) => {
-}
+export const updateAdoptionRequestStatus: ValidatedRequestHandler<
+	UpdateAdoptionRequestSchema
+> = async (req, res) => {
+	const updatedRequest = await adoptionService.updateAdoptionRequestStatus(
+		req.params.id,
+		{ id: res.locals.userId, role: res.locals.userId },
+		req.body,
+	);
+
+	return successResponse(res, {
+		statusCode: HttpStatus.OK,
+		message: "Adoption request updated successfully.",
+		data: updatedRequest,
+	});
+};
