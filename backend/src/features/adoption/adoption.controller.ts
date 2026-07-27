@@ -6,6 +6,7 @@ import type {
 	GetAdoptionRequestDetailsSchema,
 	GetAllAdoptionRequestSchema,
 	GetMyAdoptionRequestsSchema,
+	UpdateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
 import * as adoptionService from "./adoption.service";
 
@@ -74,3 +75,7 @@ export const getAdoptionRequestDetails: ValidatedRequestHandler<
 		data,
 	});
 };
+
+// -- Update Adoption Request Status (Admin, User)
+export const updateAdoptionRequestStatus: ValidatedRequestHandler<UpdateAdoptionRequestSchema> = async (req, res) => {
+}

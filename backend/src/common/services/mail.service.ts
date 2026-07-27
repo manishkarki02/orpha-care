@@ -26,6 +26,60 @@ export const sendMail = async (email: string, childName: string) => {
 	}
 };
 
+export const sendAdoptionRequestApprovedMail = async (email: string, childName: string) => {
+	try {
+		const info = await transporter.sendMail({
+			from: Environment.get("SMTP_FROM"),
+			to: email,
+			subject: "Adoption request approved",
+			html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <h2 style="color: #333; text-align: center;">Adoption Request Approved</h2>
+          <p style="color: #555; font-size: 16px;">
+            Congratulations. Your adoption request for ${childName} has been approved.
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            Please visit the OrphaCare center for the next steps and required documentation.
+          </p>
+          <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+            Thank you for being part of OrphaCare.
+          </p>
+        </div>
+      `,
+		});
+		return info;
+	} catch {
+		return false;
+	}
+};
+
+export const sendAdoptionRequestRejectedMail = async (email: string, childName: string) => {
+	try {
+		const info = await transporter.sendMail({
+			from: Environment.get("SMTP_FROM"),
+			to: email,
+			subject: "Adoption request update",
+			html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <h2 style="color: #333; text-align: center;">Adoption Request Update</h2>
+          <p style="color: #555; font-size: 16px;">
+            Thank you for your interest in adopting ${childName}.
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            After reviewing your request, we are unable to approve it at this time.
+          </p>
+          <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+            You may contact the OrphaCare center if you need more information.
+          </p>
+        </div>
+      `,
+		});
+		return info;
+	} catch {
+		return false;
+	}
+};
+
 export const sendVerificationMail = async (email: string, token: string) => {
 	try {
 		const verificationLink = `${Environment.get("FRONTEND_URL")}/verify-email?token=${token}&email=${email}`;

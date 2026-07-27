@@ -11,6 +11,7 @@ import type {
 	CreateAdoptionRequestSchema,
 	GetAllAdoptionRequestSchema,
 	GetMyAdoptionRequestsSchema,
+	UpdateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
 import { AdoptionRequestStatus, Role } from "@/generated/prisma/enums";
 import type { CreatedAdoptionRequest } from "./adoption.type";
@@ -291,4 +292,16 @@ export const getAdoptionRequestDetails = async (id: string, user: { id: string; 
 	}
 
 	return adoptionRequest;
+};
+
+// -- Update Adoption Request Status (Admin, User)
+export const updateAdoptionRequestStatus = async (
+	id: string,
+	user: {
+		id: string;
+		role: Role;
+	},
+	body: UpdateAdoptionRequestSchema["body"],
+) => {
+	
 };

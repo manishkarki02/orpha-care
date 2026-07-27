@@ -60,3 +60,4 @@ export type CreateAdoptionRequestSchema = z.infer<typeof createAdoptionRequestSc
 export type GetMyAdoptionRequestsSchema = z.infer<typeof getMyAdoptionRequestsSchema>;
 export type GetAllAdoptionRequestSchema = z.infer<typeof getAllAdoptionRequestSchema>;
 export type GetAdoptionRequestDetailsSchema = z.infer<typeof getAdoptionRequestDetailsSchema>;
+export type UpdateAdoptionRequestSchema = z.infer<typeof updateAdoptionRequestSchema>;
