@@ -1,5 +1,5 @@
 import { sendMail } from "@/common/services/mail.service";
-import { ConflictError, NotFoundError } from "@/common/utils/errorClass.utils";
+import { BadRequestError, ConflictError, NotFoundError } from "@/common/utils/errorClass.utils";
 import buildPrismaQuery from "@/common/utils/query.utils";
 import { buildPaginationMetaData } from "@/common/utils/response.utils";
 import {
@@ -13,8 +13,14 @@ import type {
 	GetMyAdoptionRequestsSchema,
 	UpdateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
-import { AdoptionRequestStatus, Role } from "@/generated/prisma/enums";
-import type { CreatedAdoptionRequest } from "./adoption.type";
+import {
+	AdoptionRequestStatus,
+	Role,
+	TaskResult,
+	TaskStatus,
+	TaskType,
+} from "@/generated/prisma/enums";
+import type { AdoptionRequestData, CreatedAdoptionRequest } from "./adoption.type";
 import { throwIfActiveRequestConflict } from "./adoption.utils";
 
 // -- Create Adoption Request
@@ -303,5 +309,86 @@ export const updateAdoptionRequestStatus = async (
 	},
 	body: UpdateAdoptionRequestSchema["body"],
 ) => {
-	
+	const updatedData = await prisma.$transaction(async (tx) => {
+		const foundRequest = await tx.adoptionRequest.findUnique({
+			where: {
+				id,
+				deletedAt: null,
+			},
+			select: {
+				id: true,
+				status: true,
+				kidId: true,
+				adopterId: true,
+				tasks: {
+					select: {
+						id: true,
+						type: true,
+						status: true,
+						result: true,
+						deletedAt: true,
+					},
+				},
+			},
+		});
+
+		if (!foundRequest) {
+			throw new NotFoundError("Adoption request not found.");
+		} else if (foundRequest.status !== AdoptionRequestStatus.Pending) {
+			throw new BadRequestError("Invalid request: adoption request's status cannot be updated.");
+		}
+
+		// if (user.role === Role.Admin && body.status === AdoptionRequestStatus.Approved) {
+		// 	if (
+		// 		foundRequest.tasks.some(
+		// 			({ status, result }) => status !== TaskStatus.Completed && result !== TaskResult.Suitable,
+		// 		)
+		// 	) {
+		// 		throw new BadRequestError("This request cannot be approved.");
+		// 	}
+		// 	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
+		// 		SELECT id, is_adopted FROM kids_for_adoption
+		// 		WHERE id = ${foundRequest.kidId} AND deleted_at IS NULL
+		// 		FOR UPDATE
+		// 	`;
+
+		// 	if (!foundKid) {
+		// 		throw new NotFoundError("Kid not found.");
+		// 	} else if (foundKid.is_adopted !== false) {
+		// 		throw new ConflictError("Kid is already adopted.");
+		// 	}
+		// } else if (user.role === Role.Admin && body.status === AdoptionRequestStatus.Rejected) {
+		// 	return tx.adoptionRequest.update({
+		// 		where: {
+		// 			id,
+		// 			deletedAt: null,
+		// 		},
+		// 		data: {
+		// 			status: body.status,
+		// 			updatedById: user.id,
+		// 		},
+		// 	});
+		// }
+	});
 };
+
+// -- Check If Admin can approve the Adoption Request
+function canApprove(request: AdoptionRequestData) {
+	return (
+		request.status === AdoptionRequestStatus.UnderReview &&
+		request.tasks.some(
+			({ status, result, type }) =>
+				type === TaskType.AdoptionHomeSurvey &&
+				status === TaskStatus.Completed &&
+				result === TaskResult.Suitable,
+		)
+	);
+}
+
+// -- Check if request can be rejected
+function canReject(request: AdoptionRequestData) {
+	return (
+		request.status === AdoptionRequestStatus.UnderReview ||
+		request.status === AdoptionRequestStatus.Pending
+	);
+}
