@@ -33,94 +33,101 @@ import {
 import type { AdoptionRequestData, CreatedAdoptionRequest } from "./adoption.type";
 import { throwIfActiveRequestConflict } from "./adoption.utils";
 
+// -- Statuses a Request can still be Moved Out Of
+const OPEN_STATUSES = [AdoptionRequestStatus.Pending, AdoptionRequestStatus.UnderReview] as const;
+
 // -- Create Adoption Request
 export const createAdoptionRequest = async (
 	userId: string,
 	body: CreateAdoptionRequestSchema["body"],
 ) => {
-	const createdRequest = await (async (): Promise<CreatedAdoptionRequest> => {
-		try {
-			return await prisma.$transaction(async (tx) => {
-				// FOR UPDATE so a concurrent approval cannot flip is_adopted while we decide.
-				const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
-	SELECT id, is_adopted FROM kids_for_adoption
-	WHERE id = ${body.kidId} AND deleted_at IS NULL
-	FOR UPDATE
-`;
-				if (!foundKid) {
-					throw new NotFoundError("Kid not found.");
-				} else if (foundKid.is_adopted !== false) {
-					throw new ConflictError("Kid is already adopted.");
-				}
-
-				const activeRequest = await tx.adoptionRequest.findFirst({
-					where: {
-						adopterId: userId,
-						status: {
-							in: [AdoptionRequestStatus.Pending, AdoptionRequestStatus.UnderReview],
-						},
-						deletedAt: null,
-					},
-				});
-				if (activeRequest) {
-					throw new ConflictError(
-						"You already have an adoption request that is pending or under review.",
-					);
-				}
-
-				const approvedSameKidRequest = await tx.adoptionRequest.findFirst({
-					where: {
-						adopterId: userId,
-						kidId: body.kidId,
-						status: AdoptionRequestStatus.Approved,
-						deletedAt: null,
-					},
-				});
-				if (approvedSameKidRequest) {
-					throw new ConflictError("You already have an approved adoption request for this kid.");
-				}
-
-				return await tx.adoptionRequest.create({
-					data: {
-						kidId: body.kidId,
-						adopterId: userId,
-						createdById: userId,
-					},
-					select: {
-						id: true,
-						kid: {
-							select: {
-								id: true,
-								name: true,
-							},
-						},
-						adopter: {
-							select: {
-								id: true,
-								name: true,
-								email: true,
-							},
-						},
-						status: true,
-						createdAt: true,
-						createdBy: {
-							select: {
-								id: true,
-								name: true,
-							},
-						},
-					},
-				});
-			});
-		} catch (ex) {
-			return throwIfActiveRequestConflict(ex);
-		}
-	})();
+	const createdRequest = await insertAdoptionRequest(userId, body.kidId);
 
 	//  Convert this to queue
 	await sendMail(createdRequest.adopter.email, createdRequest.kid.name);
 
 	return createdRequest;
+};
+
+// -- Insert a Request, Translating the Active-Request Index Violation into a Readable Conflict
+const insertAdoptionRequest = async (
+	userId: string,
+	kidId: string,
+): Promise<CreatedAdoptionRequest> => {
+	try {
+		return await prisma.$transaction(async (tx) => {
+			await lockAdoptableKid(tx, kidId);
+			await assertAdopterHasNoBlockingRequest(tx, userId, kidId);
+
+			return await tx.adoptionRequest.create({
+				data: {
+					kidId,
+					adopterId: userId,
+					createdById: userId,
+				},
+				select: {
+					id: true,
+					kid: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
+					adopter: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					},
+					status: true,
+					createdAt: true,
+					createdBy: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
+				},
+			});
+		});
+	} catch (ex) {
+		return throwIfActiveRequestConflict(ex);
+	}
+};
+
+// -- Guard: An Adopter gets One Open Request at a Time, and never a Second one for a Kid they Adopted
+const assertAdopterHasNoBlockingRequest = async (
+	tx: Prisma.TransactionClient,
+	adopterId: string,
+	kidId: string,
+) => {
+	const openRequest = await tx.adoptionRequest.findFirst({
+		where: {
+			adopterId,
+			status: { in: [...OPEN_STATUSES] },
+			deletedAt: null,
+		},
+		select: { id: true },
+	});
+	if (openRequest) {
+		throw new ConflictError(
+			"You already have an adoption request that is pending or under review.",
+		);
+	}
+
+	const approvedSameKidRequest = await tx.adoptionRequest.findFirst({
+		where: {
+			adopterId,
+			kidId,
+			status: AdoptionRequestStatus.Approved,
+			deletedAt: null,
+		},
+		select: { id: true },
+	});
+	if (approvedSameKidRequest) {
+		throw new ConflictError("You already have an approved adoption request for this kid.");
+	}
 };
 
 // -- Get All Adoption Requests
@@ -310,9 +317,6 @@ export const getAdoptionRequestDetails = async (id: string, user: { id: string; 
 	return adoptionRequest;
 };
 
-// -- Statuses a Request can still be Moved Out Of
-const OPEN_STATUSES = [AdoptionRequestStatus.Pending, AdoptionRequestStatus.UnderReview] as const;
-
 // -- Update Adoption Request Status (Admin, User)
 export const updateAdoptionRequestStatus = async (
 	id: string,
@@ -391,18 +395,7 @@ const approveAdoptionRequest = async (
 	request: AdoptionRequestData,
 	adminId: string,
 ) => {
-	// FOR UPDATE so a concurrent approval or new request cannot race us on the same kid.
-	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
-		SELECT id, is_adopted FROM kids_for_adoption
-		WHERE id = ${request.kidId} AND deleted_at IS NULL
-		FOR UPDATE
-	`;
-
-	if (!foundKid) {
-		throw new NotFoundError("Kid not found.");
-	} else if (foundKid.is_adopted !== false) {
-		throw new ConflictError("Kid is already adopted.");
-	}
+	await lockAdoptableKid(tx, request.kidId);
 
 	// Read the losing requests before updating them, so we still know whom to notify.
 	const losingRequests = await tx.adoptionRequest.findMany({
@@ -453,6 +446,24 @@ const approveAdoptionRequest = async (
 			})),
 		],
 	};
+};
+
+// -- Lock the Kid Row and Assert they are still up for Adoption
+const lockAdoptableKid = async (tx: Prisma.TransactionClient, kidId: string) => {
+	// FOR UPDATE so a concurrent approval cannot flip is_adopted while we decide.
+	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
+		SELECT id, is_adopted FROM kids_for_adoption
+		WHERE id = ${kidId} AND deleted_at IS NULL
+		FOR UPDATE
+	`;
+
+	if (!foundKid) {
+		throw new NotFoundError("Kid not found.");
+	} else if (foundKid.is_adopted !== false) {
+		throw new ConflictError("Kid is already adopted.");
+	}
+
+	return foundKid;
 };
 
 // -- Write the New Status Onto a Request
