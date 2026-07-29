@@ -15,7 +15,7 @@ export const createVolunteer = async (
 	if (file) {
 		imageUrl = `${Environment.get("API_URL")}/uploads/${file.path}`;
 	}
-	const volunteer = await prisma.volunteer.create({
+	const volunteer = await prisma.user.create({
 		data: {
 			name: data.name,
 			age: data.age,
@@ -31,7 +31,7 @@ export const createVolunteer = async (
 
 // Get all volunteers
 export const getAllVolunteers = async () => {
-	const volunteers = await prisma.volunteer.findMany({
+	const volunteers = await prisma.user.findMany({
 		select: {
 			id: true,
 			name: true,
@@ -45,7 +45,7 @@ export const getAllVolunteers = async () => {
 
 // Get a single volunteer by ID
 export const getVolunteerById = async (id: string) => {
-	const volunteer = await prisma.volunteer.findUnique({
+	const volunteer = await prisma.user.findUnique({
 		where: { id },
 		select: {
 			id: true,
@@ -68,7 +68,7 @@ export const updateVolunteer = async (
 	data: UpdateVolunteerRequestSchema["body"],
 	file: UpdateVolunteerRequestSchema["file"],
 ) => {
-	const existingVolunteer = await prisma.volunteer.findUnique({
+	const existingVolunteer = await prisma.user.findUnique({
 		where: { id },
 	});
 	if (!existingVolunteer) {
@@ -80,7 +80,7 @@ export const updateVolunteer = async (
 		imageUrl = `${Environment.get("API_URL")}/uploads/${file.path}`;
 	}
 
-	const updatedVolunteer = await prisma.volunteer.update({
+	const updatedVolunteer = await prisma.user.update({
 		where: { id },
 		data: {
 			name: data.name,
@@ -98,14 +98,14 @@ export const updateVolunteer = async (
 
 // Delete a volunteer
 export const deleteVolunteer = async (id: string) => {
-	const existingVolunteer = await prisma.volunteer.findUnique({
+	const existingVolunteer = await prisma.user.findUnique({
 		where: { id },
 	});
 	if (!existingVolunteer) {
 		throw new NotFoundError("Volunteer not found.");
 	}
 
-	await prisma.volunteer.delete({
+	await prisma.user.delete({
 		where: { id },
 	});
 	return;

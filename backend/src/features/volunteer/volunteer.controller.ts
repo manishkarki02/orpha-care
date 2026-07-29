@@ -1,6 +1,6 @@
 import HttpStatus from "http-status";
 import type { ValidatedRequestHandler } from "@/common/types";
-import ApiResponse from "@/common/utils/response.utils";
+import { successResponse } from "@/common/utils/response.utils";
 import type {
 	CreateVolunteerRequestSchema,
 	UpdateVolunteerRequestSchema,
@@ -14,7 +14,7 @@ export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSche
 ) => {
 	const createdVolunteer = await volunteerService.createVolunteer(req.body, req.file);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.CREATED,
 		message: "Volunteer created successfully",
 		data: createdVolunteer,
@@ -24,7 +24,7 @@ export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSche
 export const getAllVolunteers: ValidatedRequestHandler = async (_req, res) => {
 	const volunteers = await volunteerService.getAllVolunteers();
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Volunteers retrieved successfully",
 		data: volunteers,
@@ -37,7 +37,7 @@ export const getVolunteerDetail: ValidatedRequestHandler<VolunteerRequestIdSchem
 ) => {
 	const volunteer = await volunteerService.getVolunteerById(req.params.id);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Volunteer detail retrieved successfully",
 		data: volunteer,
@@ -54,7 +54,7 @@ export const updateVolunteer: ValidatedRequestHandler<UpdateVolunteerRequestSche
 		req.file,
 	);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Volunteer updated successfully",
 		data: updatedVolunteer,
@@ -67,7 +67,7 @@ export const deleteVolunteer: ValidatedRequestHandler<VolunteerRequestIdSchema> 
 ) => {
 	await volunteerService.deleteVolunteer(req.params.id);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Volunteer deleted successfully",
 	});
