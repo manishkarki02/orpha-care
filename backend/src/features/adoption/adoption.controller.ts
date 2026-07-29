@@ -82,7 +82,7 @@ export const updateAdoptionRequestStatus: ValidatedRequestHandler<
 > = async (req, res) => {
 	const updatedRequest = await adoptionService.updateAdoptionRequestStatus(
 		req.params.id,
-		{ id: res.locals.userId, role: res.locals.userId },
+		{ id: res.locals.userId, role: res.locals.role },
 		req.body,
 	);
 

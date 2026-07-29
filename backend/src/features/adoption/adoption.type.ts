@@ -24,16 +24,21 @@ export type CreatedAdoptionRequest = {
 	};
 };
 
+// Shape loaded before a status update, holding everything the rules need to decide.
 export type AdoptionRequestData = {
-	kidId: string;
-	status: AdoptionRequestStatus;
-	adopterId: string;
 	id: string;
+	status: AdoptionRequestStatus;
+	kidId: string;
+	adopterId: string;
+	kid: {
+		name: string;
+	};
+	adopter: {
+		email: string;
+	};
 	tasks: {
 		type: TaskType;
 		status: TaskStatus;
-		id: string;
 		result: TaskResult | null;
-		deletedAt: Date | null;
 	}[];
 };

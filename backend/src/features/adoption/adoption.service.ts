@@ -1,5 +1,14 @@
-import { sendMail } from "@/common/services/mail.service";
-import { BadRequestError, ConflictError, NotFoundError } from "@/common/utils/errorClass.utils";
+import {
+	sendAdoptionRequestApprovedMail,
+	sendAdoptionRequestRejectedMail,
+	sendMail,
+} from "@/common/services/mail.service";
+import {
+	AuthorizationError,
+	BadRequestError,
+	ConflictError,
+	NotFoundError,
+} from "@/common/utils/errorClass.utils";
 import buildPrismaQuery from "@/common/utils/query.utils";
 import { buildPaginationMetaData } from "@/common/utils/response.utils";
 import {
@@ -13,6 +22,7 @@ import type {
 	GetMyAdoptionRequestsSchema,
 	UpdateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
+import type { Prisma } from "@/generated/prisma/client";
 import {
 	AdoptionRequestStatus,
 	Role,
@@ -300,6 +310,9 @@ export const getAdoptionRequestDetails = async (id: string, user: { id: string; 
 	return adoptionRequest;
 };
 
+// -- Statuses a Request can still be Moved Out Of
+const OPEN_STATUSES = [AdoptionRequestStatus.Pending, AdoptionRequestStatus.UnderReview] as const;
+
 // -- Update Adoption Request Status (Admin, User)
 export const updateAdoptionRequestStatus = async (
 	id: string,
@@ -309,8 +322,8 @@ export const updateAdoptionRequestStatus = async (
 	},
 	body: UpdateAdoptionRequestSchema["body"],
 ) => {
-	const updatedData = await prisma.$transaction(async (tx) => {
-		const foundRequest = await tx.adoptionRequest.findUnique({
+	const { updatedRequest, mails } = await prisma.$transaction(async (tx) => {
+		const foundRequest = await tx.adoptionRequest.findFirst({
 			where: {
 				id,
 				deletedAt: null,
@@ -320,13 +333,14 @@ export const updateAdoptionRequestStatus = async (
 				status: true,
 				kidId: true,
 				adopterId: true,
+				kid: { select: { name: true } },
+				adopter: { select: { email: true } },
 				tasks: {
+					where: { deletedAt: null },
 					select: {
-						id: true,
 						type: true,
 						status: true,
 						result: true,
-						deletedAt: true,
 					},
 				},
 			},
@@ -334,61 +348,192 @@ export const updateAdoptionRequestStatus = async (
 
 		if (!foundRequest) {
 			throw new NotFoundError("Adoption request not found.");
-		} else if (foundRequest.status !== AdoptionRequestStatus.Pending) {
-			throw new BadRequestError("Invalid request: adoption request's status cannot be updated.");
 		}
 
-		// if (user.role === Role.Admin && body.status === AdoptionRequestStatus.Approved) {
-		// 	if (
-		// 		foundRequest.tasks.some(
-		// 			({ status, result }) => status !== TaskStatus.Completed && result !== TaskResult.Suitable,
-		// 		)
-		// 	) {
-		// 		throw new BadRequestError("This request cannot be approved.");
-		// 	}
-		// 	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
-		// 		SELECT id, is_adopted FROM kids_for_adoption
-		// 		WHERE id = ${foundRequest.kidId} AND deleted_at IS NULL
-		// 		FOR UPDATE
-		// 	`;
+		assertStatusChangeAllowed(foundRequest, user, body.status);
 
-		// 	if (!foundKid) {
-		// 		throw new NotFoundError("Kid not found.");
-		// 	} else if (foundKid.is_adopted !== false) {
-		// 		throw new ConflictError("Kid is already adopted.");
-		// 	}
-		// } else if (user.role === Role.Admin && body.status === AdoptionRequestStatus.Rejected) {
-		// 	return tx.adoptionRequest.update({
-		// 		where: {
-		// 			id,
-		// 			deletedAt: null,
-		// 		},
-		// 		data: {
-		// 			status: body.status,
-		// 			updatedById: user.id,
-		// 		},
-		// 	});
-		// }
+		if (body.status === AdoptionRequestStatus.Approved) {
+			return approveAdoptionRequest(tx, foundRequest, user.id);
+		}
+
+		const updatedRequest = await setAdoptionRequestStatus(
+			tx,
+			foundRequest.id,
+			body.status,
+			user.id,
+		);
+
+		return {
+			updatedRequest,
+			// Cancelling is the adopter's own action, so it needs no notification.
+			mails:
+				body.status === AdoptionRequestStatus.Rejected
+					? [{ email: foundRequest.adopter.email, kidName: foundRequest.kid.name, approved: false }]
+					: [],
+		};
 	});
+
+	//  Convert this to queue
+	await Promise.all(
+		mails.map(({ email, kidName, approved }) =>
+			approved
+				? sendAdoptionRequestApprovedMail(email, kidName)
+				: sendAdoptionRequestRejectedMail(email, kidName),
+		),
+	);
+
+	return updatedRequest;
 };
 
-// -- Check If Admin can approve the Adoption Request
-function canApprove(request: AdoptionRequestData) {
-	return (
-		request.status === AdoptionRequestStatus.UnderReview &&
-		request.tasks.some(
-			({ status, result, type }) =>
-				type === TaskType.AdoptionHomeSurvey &&
-				status === TaskStatus.Completed &&
-				result === TaskResult.Suitable,
-		)
+// -- Approve a Request: adopt the kid out and reject every other request for that kid
+const approveAdoptionRequest = async (
+	tx: Prisma.TransactionClient,
+	request: AdoptionRequestData,
+	adminId: string,
+) => {
+	// FOR UPDATE so a concurrent approval or new request cannot race us on the same kid.
+	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
+		SELECT id, is_adopted FROM kids_for_adoption
+		WHERE id = ${request.kidId} AND deleted_at IS NULL
+		FOR UPDATE
+	`;
+
+	if (!foundKid) {
+		throw new NotFoundError("Kid not found.");
+	} else if (foundKid.is_adopted !== false) {
+		throw new ConflictError("Kid is already adopted.");
+	}
+
+	// Read the losing requests before updating them, so we still know whom to notify.
+	const losingRequests = await tx.adoptionRequest.findMany({
+		where: {
+			kidId: request.kidId,
+			id: { not: request.id },
+			status: { in: [...OPEN_STATUSES] },
+			deletedAt: null,
+		},
+		select: {
+			id: true,
+			adopter: { select: { email: true } },
+		},
+	});
+
+	await tx.kidsForAdoption.update({
+		where: { id: request.kidId },
+		data: {
+			isAdopted: true,
+			adopterId: request.adopterId,
+			updatedById: adminId,
+		},
+	});
+
+	await tx.adoptionRequest.updateMany({
+		where: { id: { in: losingRequests.map(({ id }) => id) } },
+		data: {
+			status: AdoptionRequestStatus.Rejected,
+			updatedById: adminId,
+		},
+	});
+
+	const updatedRequest = await setAdoptionRequestStatus(
+		tx,
+		request.id,
+		AdoptionRequestStatus.Approved,
+		adminId,
 	);
+
+	return {
+		updatedRequest,
+		mails: [
+			{ email: request.adopter.email, kidName: request.kid.name, approved: true },
+			...losingRequests.map(({ adopter }) => ({
+				email: adopter.email,
+				kidName: request.kid.name,
+				approved: false,
+			})),
+		],
+	};
+};
+
+// -- Write the New Status Onto a Request
+const setAdoptionRequestStatus = (
+	tx: Prisma.TransactionClient,
+	id: string,
+	status: AdoptionRequestStatus,
+	updatedById: string,
+) =>
+	tx.adoptionRequest.update({
+		where: { id },
+		data: { status, updatedById },
+		select: {
+			id: true,
+			status: true,
+			kid: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+			adopter: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+			updatedAt: true,
+		},
+	});
+
+// -- Guard: Who may move a Request into which Status
+function assertStatusChangeAllowed(
+	request: AdoptionRequestData,
+	user: { id: string; role: Role },
+	nextStatus: AdoptionRequestStatus,
+) {
+	// Approved, Rejected and Cancelled requests are final for everyone.
+	if (!isOpen(request)) {
+		throw new BadRequestError("Invalid request: adoption request's status cannot be updated.");
+	}
+
+	if (user.role === Role.User) {
+		if (request.adopterId !== user.id) {
+			throw new AuthorizationError("You are not allowed to update this adoption request.");
+		} else if (nextStatus !== AdoptionRequestStatus.Cancelled) {
+			throw new BadRequestError("You can only cancel your own adoption request.");
+		}
+		return;
+	}
+
+	if (user.role !== Role.Admin) {
+		throw new AuthorizationError("You are not allowed to perform this action.");
+	}
+
+	if (
+		nextStatus !== AdoptionRequestStatus.Approved &&
+		nextStatus !== AdoptionRequestStatus.Rejected
+	) {
+		throw new BadRequestError("An adoption request can only be approved or rejected.");
+	}
+
+	// Rejection needs no survey; approval does.
+	if (nextStatus === AdoptionRequestStatus.Approved && !hasSuitableHomeSurvey(request)) {
+		throw new BadRequestError(
+			"This request cannot be approved: its home survey must be completed with a suitable result.",
+		);
+	}
 }
 
-// -- Check if request can be rejected
-function canReject(request: AdoptionRequestData) {
-	return (
-		request.status === AdoptionRequestStatus.UnderReview ||
-		request.status === AdoptionRequestStatus.Pending
+// -- Check if the Adoption Request is still Awaiting a Decision
+function isOpen(request: AdoptionRequestData): boolean {
+	return OPEN_STATUSES.some((status) => status === request.status);
+}
+
+// -- Check if the Adoption Request's Home Survey Cleared the Adopter
+function hasSuitableHomeSurvey(request: AdoptionRequestData): boolean {
+	return request.tasks.some(
+		(task) =>
+			task.type === TaskType.AdoptionHomeSurvey &&
+			task.status === TaskStatus.Completed &&
+			task.result === TaskResult.Suitable,
 	);
 }
