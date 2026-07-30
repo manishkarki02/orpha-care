@@ -11,6 +11,7 @@ export default new PrismaClient({ adapter }).$extends({
 	query: {
 		$allModels: {
 			async $allOperations({ model, operation, args, query }) {
+				const readOperations = new Set
 			},
 		},
 	},
