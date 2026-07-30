@@ -122,7 +122,6 @@ model User {
   deletedTasks            Task[]            @relation("TaskDeletedBy")
   createdDonations        Donation[]        @relation("DonationCreatedBy")
   updatedDonations        Donation[]        @relation("DonationUpdatedBy")
-  deletedDonations        Donation[]        @relation("DonationDeletedBy")
 
   @@index([role])
   @@index([isVerified])
@@ -148,7 +147,7 @@ model KidsForAdoption {
 
   // Audit
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime?  @updatedAt @map("updated_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   createdById String  @map("created_by_id")
@@ -304,8 +303,6 @@ model Donation {
   createdBy   User    @relation("DonationCreatedBy", fields: [createdById], references: [id])
   updatedById String? @map("updated_by_id")
   updatedBy   User?   @relation("DonationUpdatedBy", fields: [updatedById], references: [id])
-  deletedById String? @map("deleted_by_id")
-  deletedBy   User?   @relation("DonationDeletedBy", fields: [deletedById], references: [id])
 
   @@index([donorId])
   @@index([type])

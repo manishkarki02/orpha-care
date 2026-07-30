@@ -8,18 +8,18 @@ import type {
 } from "@/features/volunteer/volunteer.schema";
 import * as volunteerService from "@/features/volunteer/volunteer.service";
 
-export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSchema> = async (
-	req,
-	res,
-) => {
-	const createdVolunteer = await volunteerService.createVolunteer(req.body, req.file);
+// export const createVolunteer: ValidatedRequestHandler<CreateVolunteerRequestSchema> = async (
+// 	req,
+// 	res,
+// ) => {
+// 	const createdVolunteer = await volunteerService.createVolunteer(req.body, req.file);
 
-	return successResponse(res, {
-		statusCode: HttpStatus.CREATED,
-		message: "Volunteer created successfully",
-		data: createdVolunteer,
-	});
-};
+// 	return successResponse(res, {
+// 		statusCode: HttpStatus.CREATED,
+// 		message: "Volunteer created successfully",
+// 		data: createdVolunteer,
+// 	});
+// };
 
 export const getAllVolunteers: ValidatedRequestHandler = async (_req, res) => {
 	const volunteers = await volunteerService.getAllVolunteers();

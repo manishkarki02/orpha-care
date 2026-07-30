@@ -6,4 +6,12 @@ const adapter = new PrismaPg({
 	connectionString: Environment.get("DATABASE_URL"),
 });
 
-export default new PrismaClient({ adapter });
+export default new PrismaClient({ adapter }).$extends({
+	name: "soft-delete",
+	query: {
+		$allModels: {
+			async $allOperations({ model, operation, args, query }) {
+			},
+		},
+	},
+});

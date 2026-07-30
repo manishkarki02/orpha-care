@@ -1,33 +1,7 @@
 import { InternalServerError, NotFoundError } from "@/common/utils/errorClass.utils";
 import Environment from "@/config/env.config";
 import prisma from "@/db";
-import type {
-	CreateVolunteerRequestSchema,
-	UpdateVolunteerRequestSchema,
-} from "@/features/volunteer/volunteer.schema";
-
-// Create a new volunteer
-export const createVolunteer = async (
-	data: CreateVolunteerRequestSchema["body"],
-	file: CreateVolunteerRequestSchema["file"],
-) => {
-	let imageUrl = null;
-	if (file) {
-		imageUrl = `${Environment.get("API_URL")}/uploads/${file.path}`;
-	}
-	const volunteer = await prisma.user.create({
-		data: {
-			name: data.name,
-			age: data.age,
-			picture: imageUrl,
-		},
-	});
-	if (!volunteer) {
-		throw new InternalServerError("Failed to create volunteer");
-	}
-
-	return volunteer;
-};
+import type { UpdateVolunteerRequestSchema } from "@/features/volunteer/volunteer.schema";
 
 // Get all volunteers
 export const getAllVolunteers = async () => {
