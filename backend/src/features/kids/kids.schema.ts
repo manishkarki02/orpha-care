@@ -1,5 +1,5 @@
 import z from "zod/v4";
-import { fileSchema } from "@/common/validation/common.schema";
+import { fileSchema, filterDateSchema } from "@/common/validation/common.schema";
 import { queryValidationSchema } from "@/common/validation/query.schema";
 import { Gender, Province } from "@/generated/prisma/enums";
 
@@ -26,14 +26,8 @@ export const getKidsRequestSchema = z.object({
 			...queryValidationSchema.shape,
 			sortBy: z.enum(["createdAt", "dob", "province", "name"], "Invalid sort by value").optional(),
 
-			fromDate: z.coerce
-				.date("Invalid from date")
-				.transform((d) => d.toISOString())
-				.optional(),
-			toDate: z.coerce
-				.date("Invalid to date")
-				.transform((d) => d.toISOString())
-				.optional(),
+			fromDate: filterDateSchema("From date"),
+			toDate: filterDateSchema("To date"),
 
 			gender: genderSchema.optional(),
 			province: z.enum(Province).optional(),

@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { TaskType } from "@/generated/prisma/client";
+import { filterDateSchema } from "@/common/validation/common.schema";
+import { queryValidationSchema } from "@/common/validation/query.schema";
+import { TaskStatus, TaskType } from "@/generated/prisma/client";
 
 const MAX_TASK_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -82,26 +84,43 @@ const fileSchema = z.object({
 
 // -- Request schema
 export const createTaskRequestSchema = z.object({
-	body: z.object({
-		title: requiredText("Title", 150),
+	body: z
+		.object({
+			title: requiredText("Title", 150),
 
-		description: optionalText("Description", 2_000),
+			description: optionalText("Description", 2_000),
 
-		type: z.enum(TaskType, {
-			error: "Invalid task type",
-		}),
+			type: z.enum(TaskType, {
+				error: "Invalid task type",
+			}),
 
-		dueDate: optionalDate,
+			dueDate: optionalDate,
 
-		volunteerId: z.uuid({
-			error: "Assigned volunteer must be a valid UUID",
-		}),
+			volunteerId: z.uuidv4({
+				error: "Assigned volunteer must be a valid UUID",
+			}),
 
-		adoptionRequestId: optionalUuid("Adoption request ID"),
+			adoptionRequestId: optionalUuid("Adoption request ID"),
 
-		missingReportId: optionalUuid("Missing report ID"),
-	}),
+			missingReportId: optionalUuid("Missing report ID"),
+		})
+		.refine(
+			(data) => {
+				if (
+					(data.type === TaskType.AdoptionHomeSurvey &&
+						(!data.adoptionRequestId || data.missingReportId)) ||
+					(data.type === TaskType.MissingChildFollowUp &&
+						(!data.missingReportId || data.adoptionRequestId))
+				) {
+					return false;
+				}
 
+				return true;
+			},
+			{
+				error: "Invalid Request. Either send missing report Id",
+			},
+		),
 	files: z
 		.array(fileSchema)
 		.max(MAX_TASK_IMAGES, `A task can contain at most ${MAX_TASK_IMAGES} images`)
@@ -109,5 +128,36 @@ export const createTaskRequestSchema = z.object({
 		.default([]),
 });
 
+export const getMyTaskRequestSchema = z.object({
+	query: z.object({
+		...queryValidationSchema.shape,
+
+		// Filter Schema
+		type: z.enum(TaskType).optional(),
+		status: z.enum(TaskStatus).optional(),
+
+		// Date filter schema
+		fromDate: filterDateSchema("From date"),
+		toDate: filterDateSchema("To date"),
+	}),
+});
+
+export const getAllTaskRequestSchema = z.object({
+	query: z.object({
+		...getMyTaskRequestSchema.shape.query.shape,
+
+		volunteer: optionalUuid("Volunteer Id"),
+	}),
+});
+
+export const getTaskDetailsRequestSchema = z.object({
+	params: z.object({
+		id: z.uuidv4("Id is invalid"),
+	}),
+});
+
 // -- Type Export
 export type CreateTaskRequestSchema = z.infer<typeof createTaskRequestSchema>;
+export type GetMyTaskRequestSchema = z.infer<typeof getMyTaskRequestSchema>;
+export type GetAllTasksRequestSchema = z.infer<typeof getAllTaskRequestSchema>;
+export type GetTaskDetailRequestSchema = z.infer<typeof getTaskDetailsRequestSchema>;

@@ -1,4 +1,5 @@
 import z from "zod/v4";
+import { filterDateSchema } from "@/common/validation/common.schema";
 import { queryValidationSchema } from "@/common/validation/query.schema";
 import { AdoptionRequestStatus } from "@/generated/prisma/enums";
 
@@ -22,14 +23,8 @@ export const getAllAdoptionRequestSchema = z.object({
 			...getMyAdoptionRequestsSchema.shape.query.shape,
 			sortBy: z.enum(["createdAt", "status"], "Invalid sort by value").optional(),
 
-			fromDate: z.coerce
-				.date("Invalid from date")
-				.transform((d) => d.toISOString())
-				.optional(),
-			toDate: z.coerce
-				.date("Invalid to date")
-				.transform((d) => d.toISOString())
-				.optional(),
+			fromDate: filterDateSchema("From date"),
+			toDate: filterDateSchema("To date"),
 
 			kidId: z.uuidv4("Invalid Kid Id").optional(),
 			adopterId: z.uuidv4("Invalid Adopter Id").optional(),

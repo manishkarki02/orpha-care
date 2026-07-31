@@ -1,4 +1,5 @@
 import z from "zod/v4";
+import { filterDateSchema } from "@/common/validation/common.schema";
 import { queryValidationSchema } from "@/common/validation/query.schema";
 import { DonationStatus, DonationType } from "@/generated/prisma/enums";
 
@@ -78,14 +79,8 @@ export const getDonationsRequestSchema = z.object({
 			type: typeSchema.optional(),
 			status: z.enum(DonationStatus, "Invalid Donation Status").optional(),
 
-			fromDate: z.coerce
-				.date("Invalid from date")
-				.transform((d) => d.toISOString())
-				.optional(),
-			toDate: z.coerce
-				.date("Invalid to date")
-				.transform((d) => d.toISOString())
-				.optional(),
+			fromDate: filterDateSchema("From date"),
+			toDate: filterDateSchema("To date"),
 
 			sortBy: donationSortBySchema,
 		})

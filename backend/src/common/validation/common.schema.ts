@@ -24,3 +24,9 @@ export const fileSchema = z.object({
 
 	size: z.number().int().positive().max(MAX_FILE_SIZE, "Each image must not exceed 5 MB"),
 });
+
+export const filterDateSchema = (fieldName: string) =>
+	z.coerce
+		.date(`Invalid ${fieldName}`)
+		.transform((d) => d.toISOString())
+		.optional();
