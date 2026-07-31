@@ -2,24 +2,23 @@
 	"compilerOptions": {
 		"target": "ES2023",
 		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"lib": ["ES2023"],
+
 		"rootDir": "./src",
 		"outDir": "./dist",
+
 		"strict": true,
-		"strictNullChecks": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
+
 		"resolveJsonModule": true,
 		"sourceMap": true,
-		"moduleResolution": "nodenext",
+
 		"allowJs": true,
 		"checkJs": false,
-		"noImplicitAny": true,
-		"typeRoots": [
-			// "./src/types",
-			"./node_modules/@types"
-		],
+
 		"paths": {
 			"@/*": ["./src/*"]
 		}
