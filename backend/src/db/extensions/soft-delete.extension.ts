@@ -1,13 +1,13 @@
 import { Prisma } from "@/generated/prisma/client";
 
 const softDeleteModels = new Set([
-    "users",
-    "kids_for_adoption",
-    "adoption_requests",
-    "missing_reports",
-    "tasks",
-    "donations"
-])
+	"users",
+	"kids_for_adoption",
+	"adoption_requests",
+	"missing_reports",
+	"tasks",
+	"donations",
+]);
 
 export const softDeleteExtension = Prisma.defineExtension({
 	name: "soft-delete",
@@ -25,7 +25,19 @@ export const softDeleteExtension = Prisma.defineExtension({
 					"groupBy",
 				]);
 
-                
+				if (!model || !softDeleteModels.has(model) || !readOperations.has(operation)) {
+					return query(args);
+				}
+
+				const queryArgs = args as {
+					where?: Record<string, unknown>;
+				};
+
+				queryArgs.where = {
+					AND: [queryArgs.where ?? {}, { deletedAt: null }],
+				};
+
+				return query(args);
 			},
 		},
 	},
