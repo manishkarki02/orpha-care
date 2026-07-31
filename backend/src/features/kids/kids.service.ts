@@ -2,7 +2,8 @@ import { InternalServerError, NotFoundError } from "@/common/utils/errorClass.ut
 import buildPrismaQuery from "@/common/utils/query.utils";
 import Environment from "@/config/env.config";
 import { kidsAllQueryConfig, kidsQueryConfig } from "@/config/query.config";
-import prisma from "@/db";
+import { prisma } from "@/db";
+import { softDeleteKidWithRelations } from "@/features/kids/kids.repository";
 import { Role } from "@/generated/prisma/enums";
 import type {
 	CreateKidRequestSchema,
@@ -177,23 +178,8 @@ export const updateKidDetails = async (
 	});
 };
 
-// -- Delete a Kid by Id
+// -- Delete a Kid by Id, along with their adoption requests and home survey tasks
 export const deleteKidById = async (id: string, userId: string) => {
-	await prisma.$transaction(async (tx) => {
-		const existingKid = await tx.kidsForAdoption.findUnique({
-			where: { id, deletedAt: null, isAdopted: false },
-		});
-		if (!existingKid) {
-			throw new NotFoundError("Kid not found.");
-		}
-		await tx.kidsForAdoption.update({
-			where: { id },
-			data: {
-				deletedAt: new Date(),
-				updatedById: userId,
-				deletedById: userId,
-			},
-		});
-	});
+	await softDeleteKidWithRelations(id, userId);
 	return;
 };
