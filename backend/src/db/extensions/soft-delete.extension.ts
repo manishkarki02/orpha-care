@@ -1,43 +1,62 @@
+import { BadRequestError } from "@/common/utils/errorClass.utils";
 import { Prisma } from "@/generated/prisma/client";
 
 const softDeleteModels = new Set([
-	"users",
-	"kids_for_adoption",
-	"adoption_requests",
-	"missing_reports",
-	"tasks",
-	"donations",
+	"User",
+	"KidsForAdoption",
+	"AdoptionRequest",
+	"MissingReport",
+	"Task",
+	"Donation",
+]);
+
+const filteredOperations = new Set([
+	"findUnique",
+	"findUniqueOrThrow",
+	"findFirst",
+	"findFirstOrThrow",
+	"findMany",
+	"count",
+	"aggregate",
+	"groupBy",
+	"update",
+	"updateMany",
 ]);
 
 export const softDeleteExtension = Prisma.defineExtension({
 	name: "soft-delete",
+
 	query: {
 		$allModels: {
 			async $allOperations({ model, operation, args, query }) {
-				const readOperations = new Set([
-					"findUnique",
-					"findUniqueOrThrow",
-					"findFirst",
-					"findFirstOrThrow",
-					"findMany",
-					"count",
-					"aggregate",
-					"groupBy",
-				]);
-
-				if (!model || !softDeleteModels.has(model) || !readOperations.has(operation)) {
+				if (!model || !softDeleteModels.has(model) || !filteredOperations.has(operation)) {
 					return query(args);
 				}
 
 				const queryArgs = args as {
 					where?: Record<string, unknown>;
+					data?: Record<string, unknown>;
 				};
+
+				if (
+					(operation === "update" || operation === "updateMany") &&
+					queryArgs.data &&
+					Object.hasOwn(queryArgs.data, "deletedAt")
+				) {
+					throw new BadRequestError("The deletedAt field cannot be changed directly.", {
+						deletedAt: {
+							code: "PROTECTED_FIELD",
+							message: "Use the soft-delete or restore operation to change this field.",
+						},
+					});
+				}
 
 				queryArgs.where = {
-					AND: [queryArgs.where ?? {}, { deletedAt: null }],
+					...queryArgs.where,
+					deletedAt: null,
 				};
 
-				return query(args);
+				return query(queryArgs);
 			},
 		},
 	},

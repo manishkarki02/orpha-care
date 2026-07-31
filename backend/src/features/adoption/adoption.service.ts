@@ -15,14 +15,13 @@ import {
 	allAdoptionRequestsQueryConfig,
 	myAdoptionRequestsQueryConfig,
 } from "@/config/query.config";
-import prisma from "@/db";
+import { prisma, type TransactionClient } from "@/db";
 import type {
 	CreateAdoptionRequestSchema,
 	GetAllAdoptionRequestSchema,
 	GetMyAdoptionRequestsSchema,
 	UpdateAdoptionRequestSchema,
 } from "@/features/adoption/adoption.schema";
-import type { Prisma } from "@/generated/prisma/client";
 import {
 	AdoptionRequestStatus,
 	Role,
@@ -98,7 +97,7 @@ const insertAdoptionRequest = async (
 
 // -- Guard: An Adopter gets One Open Request at a Time, and never a Second one for a Kid they Adopted
 const assertAdopterHasNoBlockingRequest = async (
-	tx: Prisma.TransactionClient,
+	tx: TransactionClient,
 	adopterId: string,
 	kidId: string,
 ) => {
@@ -391,7 +390,7 @@ export const updateAdoptionRequestStatus = async (
 
 // -- Approve a Request: adopt the kid out and reject every other request for that kid
 const approveAdoptionRequest = async (
-	tx: Prisma.TransactionClient,
+	tx: TransactionClient,
 	request: AdoptionRequestData,
 	adminId: string,
 ) => {
@@ -449,7 +448,7 @@ const approveAdoptionRequest = async (
 };
 
 // -- Lock the Kid Row and Assert they are still up for Adoption
-const lockAdoptableKid = async (tx: Prisma.TransactionClient, kidId: string) => {
+const lockAdoptableKid = async (tx: TransactionClient, kidId: string) => {
 	// FOR UPDATE so a concurrent approval cannot flip is_adopted while we decide.
 	const [foundKid] = await tx.$queryRaw<{ id: string; is_adopted: boolean | null }[]>`
 		SELECT id, is_adopted FROM kids_for_adoption
@@ -468,7 +467,7 @@ const lockAdoptableKid = async (tx: Prisma.TransactionClient, kidId: string) => 
 
 // -- Write the New Status Onto a Request
 const setAdoptionRequestStatus = (
-	tx: Prisma.TransactionClient,
+	tx: TransactionClient,
 	id: string,
 	status: AdoptionRequestStatus,
 	updatedById: string,
