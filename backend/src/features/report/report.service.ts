@@ -4,7 +4,8 @@ import {
 	NotFoundError,
 } from "@/common/utils/errorClass.utils";
 import Environment from "@/config/env.config";
-import prisma from "@/db";
+import { prisma } from "@/db";
+import { softDeleteMissingReportWithRelations } from "@/features/report/report.repository";
 import type { CreateReportRequestSchema } from "@/features/report/report.schema";
 
 export const createMissingReport = async (
@@ -29,6 +30,7 @@ export const createMissingReport = async (
 			reporterId,
 			name,
 			image: finalImage,
+			createdById: reporterId,
 		},
 	});
 
@@ -184,7 +186,6 @@ export const deleteMissingReport = async (id: string, reporterId: string) => {
 	if (existingMissingReport.reporterId !== reporterId) {
 		throw new AuthorizationError("You are not authorized to delete this missing report.");
 	}
-	await prisma.missingReport.delete({
-		where: { id: id },
-	});
+	// Soft delete, together with the follow-up tasks raised for this report.
+	await softDeleteMissingReportWithRelations(id, reporterId);
 };

@@ -1,9 +1,14 @@
-import { internalPrisma } from "@/db";
+import { internalPrisma, type SoftDeleteClient } from "@/db";
 import { executeRestore, executeSoftDelete } from "@/db/repository/soft-delete.repository";
+import { softDeleteTasksForMissingReport } from "@/features/task/task.repository";
 
-export function softDeleteMissingReport(id: string, deletedById: string) {
+export function softDeleteMissingReport(
+	id: string,
+	deletedById: string,
+	client: SoftDeleteClient = internalPrisma,
+) {
 	return executeSoftDelete(
-		internalPrisma.missingReport.updateMany({
+		client.missingReport.updateMany({
 			where: { id, deletedAt: null },
 			data: {
 				deletedAt: new Date(),
@@ -15,9 +20,13 @@ export function softDeleteMissingReport(id: string, deletedById: string) {
 	);
 }
 
-export function restoreMissingReport(id: string, restoreById: string) {
+export function restoreMissingReport(
+	id: string,
+	restoreById: string,
+	client: SoftDeleteClient = internalPrisma,
+) {
 	return executeRestore(
-		internalPrisma.missingReport.updateMany({
+		client.missingReport.updateMany({
 			where: {
 				id,
 				deletedAt: {
@@ -32,4 +41,12 @@ export function restoreMissingReport(id: string, restoreById: string) {
 		}),
 		"Missing report",
 	);
+}
+
+// -- Delete a report and the follow-up tasks that exist only to serve it.
+export function softDeleteMissingReportWithRelations(id: string, deletedById: string) {
+	return internalPrisma.$transaction(async (tx) => {
+		await softDeleteTasksForMissingReport(id, deletedById, tx);
+		return softDeleteMissingReport(id, deletedById, tx);
+	});
 }
