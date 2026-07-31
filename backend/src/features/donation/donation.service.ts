@@ -5,7 +5,7 @@ import {
 } from "@/common/utils/errorClass.utils";
 import buildPrismaQuery from "@/common/utils/query.utils";
 import { donationQueryConfig } from "@/config/query.config";
-import prisma from "@/db";
+import {prisma} from "@/db";
 import { DonationStatus, DonationType, Role } from "@/generated/prisma/enums";
 import type {
 	CreateDonationRequestSchema,

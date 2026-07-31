@@ -1,22 +1,10 @@
 import z from "zod/v4";
+import { fileSchema } from "@/common/validation/common.schema";
 import { queryValidationSchema } from "@/common/validation/query.schema";
 import { Gender, Province } from "@/generated/prisma/enums";
 
 // -- Field Schema
 const genderSchema = z.enum(Gender);
-
-const fileSchema = z.object({
-	fieldname: z.string(),
-	originalname: z.string(),
-	encoding: z.string(),
-	mimetype: z.string().refine((value) => ["image/jpeg", "image/png", "image/jpg"].includes(value), {
-		message: "Invalid file type. Only JPEG, PNG, and JPG are allowed.",
-	}),
-	destination: z.string().optional(),
-	filename: z.string(),
-	path: z.string(),
-	size: z.number().int().nonnegative(),
-});
 
 // -- Request Schemas
 export const createKidRequestSchema = z.object({

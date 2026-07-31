@@ -1,6 +1,6 @@
 import { InternalServerError, NotFoundError } from "@/common/utils/errorClass.utils";
 import Environment from "@/config/env.config";
-import prisma from "@/db";
+import { prisma } from "@/db";
 import type { UpdateVolunteerRequestSchema } from "@/features/volunteer/volunteer.schema";
 
 // Get all volunteers

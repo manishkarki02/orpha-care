@@ -6,7 +6,7 @@ import {
 	NotFoundError,
 } from "@/common/utils/errorClass.utils";
 import Environment from "@/config/env.config";
-import prisma from "@/db";
+import { prisma } from "@/db";
 import type { LoginRequestSchema, RegisterRequestSchema } from "@/features/auth/auth.schema";
 import * as authUtils from "@/features/auth/utils/auth.utils";
 import { consumeCachedToken, getCachedToken, setCachedToken } from "./tokenCache.service";
