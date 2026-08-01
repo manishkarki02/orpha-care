@@ -1,10 +1,13 @@
-import { z } from "zod";
-import { filterDateSchema } from "@/common/validation/common.schema";
+import z from "zod/v4";
+import {
+	fileSchema,
+	filterDateSchema,
+	withValidDateRange,
+} from "@/common/validation/common.schema";
 import { queryValidationSchema } from "@/common/validation/query.schema";
-import { TaskStatus, TaskType } from "@/generated/prisma/client";
+import { TaskStatus, TaskType } from "@/generated/prisma/enums";
 
 const MAX_TASK_IMAGES = 5;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 // Multipart/form-data commonly sends empty optional fields as ""
 const emptyStringToUndefined = (value: unknown) => {
@@ -43,7 +46,7 @@ const optionalUuid = (field: string) =>
 	z.preprocess(
 		emptyStringToUndefined,
 		z
-			.uuid({
+			.uuidv4({
 				error: `${field} must be a valid UUID`,
 			})
 			.nullish(),
@@ -59,28 +62,6 @@ const optionalDate = z.preprocess(
 		.transform((value) => new Date(value))
 		.nullish(),
 );
-
-const fileSchema = z.object({
-	fieldname: z.literal("images", {
-		error: "Invalid file field",
-	}),
-
-	originalname: z.string().min(1),
-
-	encoding: z.string(),
-
-	mimetype: z.enum(["image/jpeg", "image/png"], {
-		error: "Only JPEG and PNG images are allowed",
-	}),
-
-	destination: z.string().min(1),
-
-	filename: z.string().min(1),
-
-	path: z.string().min(1),
-
-	size: z.number().int().positive().max(MAX_FILE_SIZE, "Each image must not exceed 5 MB"),
-});
 
 // -- Request schema
 export const createTaskRequestSchema = z.object({
@@ -105,20 +86,25 @@ export const createTaskRequestSchema = z.object({
 			missingReportId: optionalUuid("Missing report ID"),
 		})
 		.refine(
-			(data) => {
-				if (
-					(data.type === TaskType.AdoptionHomeSurvey &&
-						(!data.adoptionRequestId || data.missingReportId)) ||
-					(data.type === TaskType.MissingChildFollowUp &&
-						(!data.missingReportId || data.adoptionRequestId))
-				) {
-					return false;
-				}
-
-				return true;
-			},
+			(data) =>
+				data.type === TaskType.AdoptionHomeSurvey
+					? Boolean(data.adoptionRequestId)
+					: !data.adoptionRequestId,
 			{
-				error: "Invalid Request. Either send missing report Id",
+				error:
+					"Adoption request ID is required for adoption home survey tasks and must be omitted for any other type",
+				path: ["adoptionRequestId"],
+			},
+		)
+		.refine(
+			(data) =>
+				data.type === TaskType.MissingChildFollowUp
+					? Boolean(data.missingReportId)
+					: !data.missingReportId,
+			{
+				error:
+					"Missing report ID is required for missing child follow-up tasks and must be omitted for any other type",
+				path: ["missingReportId"],
 			},
 		),
 	files: z
@@ -129,25 +115,31 @@ export const createTaskRequestSchema = z.object({
 });
 
 export const getMyTaskRequestSchema = z.object({
-	query: z.object({
-		...queryValidationSchema.shape,
+	query: withValidDateRange(
+		z.object({
+			...queryValidationSchema.shape,
+			sortBy: z.enum(["title", "createdAt", "dueDate", "status"]).optional(),
 
-		// Filter Schema
-		type: z.enum(TaskType).optional(),
-		status: z.enum(TaskStatus).optional(),
+			// Filter Schema
+			type: z.enum(TaskType).optional(),
+			status: z.enum(TaskStatus).optional(),
 
-		// Date filter schema
-		fromDate: filterDateSchema("From date"),
-		toDate: filterDateSchema("To date"),
-	}),
+			// Date filter schema
+			fromDate: filterDateSchema("From date"),
+			toDate: filterDateSchema("To date"),
+		}),
+	),
 });
 
 export const getAllTaskRequestSchema = z.object({
-	query: z.object({
-		...getMyTaskRequestSchema.shape.query.shape,
+	query: withValidDateRange(
+		z.object({
+			...getMyTaskRequestSchema.shape.query.shape,
+			sortBy: z.enum(["dueDate", "createdAt", "updatedAt", "status", "title"]).optional(),
 
-		volunteer: optionalUuid("Volunteer Id"),
-	}),
+			volunteerId: z.uuidv4("Volunteer Id must be a valid UUID").optional(),
+		}),
+	),
 });
 
 export const getTaskDetailsRequestSchema = z.object({

@@ -30,3 +30,10 @@ export const filterDateSchema = (fieldName: string) =>
 		.date(`Invalid ${fieldName}`)
 		.transform((d) => d.toISOString())
 		.optional();
+
+export const withValidDateRange = <T extends z.ZodObject>(schema: T) =>
+	schema.refine(
+		(query: { fromDate?: string; toDate?: string }) =>
+			!query.fromDate || !query.toDate || new Date(query.fromDate) <= new Date(query.toDate),
+		"FromDate must be before or equal to toDate",
+	);
