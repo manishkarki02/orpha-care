@@ -3,6 +3,8 @@ import type { ZodObject } from "zod";
 import { formatError } from "../utils/error.utils";
 import { BadRequestError } from "../utils/errorClass.utils";
 
+type ValidatedRequestData = Partial<Pick<Request, "body" | "query" | "params" | "file" | "files">>;
+
 export const validationMiddleware = <TSchema extends ZodObject>(schema: TSchema) => {
 	return async (req: Request, _res: Response, next: NextFunction) => {
 		try {
@@ -18,7 +20,22 @@ export const validationMiddleware = <TSchema extends ZodObject>(schema: TSchema)
 				return next(new BadRequestError("Validation error", formatError(result.error)));
 			}
 
-			req.validated = result.data;
+			const data = result.data as ValidatedRequestData;
+
+			if (data.params !== undefined) req.params = data.params;
+
+			if (data.query !== undefined) {
+				Object.defineProperty(req, "query", {
+					value: data.query,
+					writable: true,
+					configurable: true,
+					enumerable: true,
+				});
+			}
+
+			if ("body" in data) req.body = data.body;
+			if ("file" in data) req.file = data.file;
+			if ("files" in data) req.files = data.files;
 
 			return next();
 		} catch (error) {

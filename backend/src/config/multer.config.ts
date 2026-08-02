@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
+import { BadRequestError } from "@/common/utils/errorClass.utils";
 
 const UPLOAD_DIRECTORY = path.resolve("uploads");
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -42,7 +43,7 @@ export const upload = multer({
 
 	fileFilter: (_req, file, callback) => {
 		if (!allowedMimeTypes.has(file.mimetype)) {
-			callback(new Error("Invalid file type. Only JPEG and PNG images are allowed."));
+			callback(new BadRequestError("Invalid file type. Only JPEG and PNG images are allowed."));
 			return;
 		}
 

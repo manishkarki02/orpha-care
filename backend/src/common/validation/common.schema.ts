@@ -4,7 +4,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 // -- File Schema for req.file or req.files
 export const fileSchema = z.object({
-	fieldname: z.literal("images", {
+	fieldname: z.enum(["images", "image"], {
 		error: "Invalid file field",
 	}),
 
