@@ -13,6 +13,7 @@ import type {
 	UpdateDonationRequestSchema,
 	UpdateDonationStatusRequestSchema,
 } from "./donations.schema";
+import { buildPaginationMetaData } from "@/common/utils/response.utils";
 
 // Create a donation
 export const createDonation = async (
@@ -43,29 +44,32 @@ export const createDonation = async (
 export const getDonations = async (query: GetDonationsRequestSchema["query"]) => {
 	const { where, orderBy, skip, take } = buildPrismaQuery(query, donationQueryConfig);
 
-	const donation = await prisma.donation.findMany({
-		where: {
-			...where,
-			deletedAt: null,
-		},
-		take,
-		orderBy,
-		skip,
-		select: {
-			id: true,
-			weight: true,
-			amount: true,
-			type: true,
-			donor: {
-				select: {
-					name: true,
+	const finalWhere = { ...where, deletedAt: null };
+	const [donation, total] = await prisma.$transaction([
+		prisma.donation.findMany({
+			where: finalWhere,
+			take,
+			orderBy,
+			skip,
+			select: {
+				id: true,
+				weight: true,
+				amount: true,
+				type: true,
+				donor: {
+					select: {
+						name: true,
+					},
 				},
+				createdAt: true,
 			},
-			createdAt: true,
-		},
-	});
+		}),
+		prisma.donation.count({ where: finalWhere }),
+	]);
 
-	return donation;
+	const pagination = buildPaginationMetaData({ page: query.page, limit: query.limit, total });
+
+	return { data: donation, pagination };
 };
 
 // Get donation made by myself
@@ -77,30 +81,38 @@ export const getMyDonations = async (
 		...donationQueryConfig,
 		searchable: [],
 	});
-	const donation = await prisma.donation.findMany({
-		where: {
-			...where,
-			donorId,
-			deletedAt: null,
-		},
-		take,
-		skip,
-		orderBy,
-		select: {
-			id: true,
-			weight: true,
-			amount: true,
-			type: true,
-			donor: {
-				select: {
-					name: true,
-				},
-			},
-			createdAt: true,
-		},
-	});
+	const finalWhere = {
+		...where,
+		donorId,
+		deletedAt: null,
+	};
 
-	return donation;
+	const [donations, total] = await prisma.$transaction([
+		prisma.donation.findMany({
+			where: finalWhere,
+			take,
+			skip,
+			orderBy,
+			select: {
+				id: true,
+				weight: true,
+				amount: true,
+				type: true,
+				donor: {
+					select: {
+						name: true,
+					},
+				},
+				createdAt: true,
+			},
+		}),
+		prisma.donation.count({ where: finalWhere }),
+	]);
+
+	return {
+		data: donations,
+		pagination: buildPaginationMetaData({ page: query.page, limit: query.limit, total }),
+	};
 };
 
 // Get a single donation by id

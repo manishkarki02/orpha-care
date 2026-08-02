@@ -1,6 +1,6 @@
 import HttpStatus from "http-status";
 import type { ValidatedRequestHandler } from "@/common/types";
-import { successResponse } from "@/common/utils/response.utils";
+import { paginatedResponse, successResponse } from "@/common/utils/response.utils";
 import * as donationService from "@/features/donation/donation.service";
 import type {
 	CreateDonationRequestSchema,
@@ -29,12 +29,13 @@ export const getDonations: ValidatedRequestHandler<GetDonationsRequestSchema> = 
 	req,
 	res,
 ) => {
-	const donation = await donationService.getDonations(req.query);
+	const { data, pagination } = await donationService.getDonations(req.query);
 
-	return successResponse(res, {
+	return paginatedResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "All donation shown successfully.",
-		data: donation,
+		data,
+		pagination,
 	});
 };
 
@@ -43,12 +44,13 @@ export const getMyDonations: ValidatedRequestHandler<GetDonationsRequestSchema> 
 	req,
 	res,
 ) => {
-	const donation = await donationService.getMyDonations(req.query, res.locals.userId);
+	const { data, pagination } = await donationService.getMyDonations(req.query, res.locals.userId);
 
-	return successResponse(res, {
+	return paginatedResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Donation retrieved successfully.",
-		data: donation,
+		data,
+		pagination,
 	});
 };
 
