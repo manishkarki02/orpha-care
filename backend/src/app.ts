@@ -12,7 +12,6 @@ import router from "@/common/routes";
 import swaggerSpec from "@/config/swagger.config";
 import globalErrorHandler from "./common/middlewares/error.middleware";
 import { errorResponse } from "./common/utils/response.utils";
-// Importing custom modules
 import Environment from "./config/env.config";
 
 // Built-in / Imported Middlewares
