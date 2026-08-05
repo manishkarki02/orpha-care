@@ -3,3 +3,10 @@ node_modules
 .env
 dist
 /src/generated/prisma
+
+# Uploaded files — never version user content
+uploads
+private
+
+# macOS
+.DS_Store

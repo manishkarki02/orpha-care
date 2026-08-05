@@ -1,5 +1,10 @@
-
 # Local-only scratch/plan notes
 *.local.md
 .vscode
+
+# Internal working docs — architecture, roadmap and design plans.
+# Deliberately not published; the READMEs are the public documentation.
 docs
+
+# macOS
+.DS_Store
