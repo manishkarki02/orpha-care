@@ -16,7 +16,7 @@ import type {
 export const createKid = async (
 	body: CreateKidRequestSchema["body"],
 	userId: string,
-	file: CreateKidRequestSchema["file"],
+	file?: Express.Multer.File,
 ) => {
 	let imageUrl = null;
 	if (file) {
@@ -148,7 +148,7 @@ export const updateKidDetails = async (
 	id: string,
 	userId: string,
 	data: UpdateKidDetailsRequestSchema["body"],
-	file: UpdateKidDetailsRequestSchema["file"],
+	file?: Express.Multer.File,
 ) => {
 	return await prisma.$transaction(async (tx) => {
 		const existingKid = await tx.kidsForAdoption.findUnique({
