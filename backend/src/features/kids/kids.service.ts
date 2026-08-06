@@ -54,7 +54,7 @@ export const getKids = async (query: GetKidsRequestSchema["query"]) => {
 
   const finalWhere = { ...where, isAdopted: false, deletedAt: null };
 
-  const kids = await prisma.$transaction([
+  const [kids, total] = await prisma.$transaction([
     prisma.kidsForAdoption.findMany({
       where: finalWhere,
       take,
@@ -71,7 +71,14 @@ export const getKids = async (query: GetKidsRequestSchema["query"]) => {
     prisma.kidsForAdoption.count({ where: finalWhere }),
   ]);
 
-  return kids;
+  return {
+    data: kids,
+    pagination: buildPaginationMetaData({
+      page: query.page,
+      limit: query.limit,
+      total,
+    }),
+  };
 };
 
 // -- Get all kids for adoption (Admin)
