@@ -1,12 +1,12 @@
-import redis from "redis";
+import { createClient, type RedisClientType } from "redis";
 import Environment from "../../config/env.config";
 
 class RedisService {
 	static instance: RedisService;
-	private client!: redis.RedisClientType;
+	private client!: RedisClientType;
 
 	private constructor() {
-		this.client = redis.createClient({
+		this.client = createClient({
 			url: Environment.get("REDIS_URL"),
 		});
 

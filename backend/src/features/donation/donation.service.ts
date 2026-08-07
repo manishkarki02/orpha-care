@@ -4,6 +4,7 @@ import {
 	NotFoundError,
 } from "@/common/utils/errorClass.utils";
 import buildPrismaQuery from "@/common/utils/query.utils";
+import { buildPaginationMetaData } from "@/common/utils/response.utils";
 import { donationQueryConfig } from "@/config/query.config";
 import { prisma } from "@/db";
 import { DonationStatus, DonationType, Role } from "@/generated/prisma/enums";
@@ -13,7 +14,6 @@ import type {
 	UpdateDonationRequestSchema,
 	UpdateDonationStatusRequestSchema,
 } from "./donations.schema";
-import { buildPaginationMetaData } from "@/common/utils/response.utils";
 
 // Create a donation
 export const createDonation = async (
