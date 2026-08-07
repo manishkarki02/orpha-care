@@ -1,6 +1,6 @@
 import HttpStatus from "http-status";
 import type { ValidatedRequestHandler } from "@/common/types";
-import ApiResponse from "@/common/utils/response.utils";
+import { successResponse } from "@/common/utils/response.utils";
 import Environment from "@/config/env.config";
 import type {
 	ForgotPasswordRequestSchema,
@@ -17,7 +17,7 @@ import { clearCookie, setCookie } from "@/features/auth/utils/auth.utils";
 export const signUpUser: ValidatedRequestHandler<RegisterRequestSchema> = async (req, res) => {
 	await authService.signUpUser(req.body);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.CREATED,
 		message: "User registered successfully. Please check your email for verification.",
 	});
@@ -26,7 +26,7 @@ export const signUpUser: ValidatedRequestHandler<RegisterRequestSchema> = async 
 export const verifyUser: ValidatedRequestHandler<VerificationRequestSchema> = async (req, res) => {
 	await authService.verifyUser(req.body.email, req.body.token);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "User verified successfully.",
 	});
@@ -37,7 +37,7 @@ export const resendVerificationToken: ValidatedRequestHandler<
 > = async (req, res) => {
 	await authService.resendVerificationToken(req.query.email);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Verification token sent successfully.",
 	});
@@ -49,7 +49,7 @@ export const forgotPassword: ValidatedRequestHandler<ForgotPasswordRequestSchema
 ) => {
 	await authService.forgotPassword(req.body.email);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Password reset initiated. Please check your email.",
 	});
@@ -61,7 +61,7 @@ export const resetPassword: ValidatedRequestHandler<ResetPasswordRequestSchema> 
 ) => {
 	await authService.resetPassword(req.query.email, req.query.token, req.body.newPassword);
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Password reset successfully.",
 	});
@@ -77,7 +77,7 @@ export const loginUser: ValidatedRequestHandler<LoginRequestSchema> = async (req
 		expiry: Environment.get("REFRESH_TOKEN_EXPIRY"),
 	});
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Login successful.",
 		data: responseData,
@@ -97,7 +97,7 @@ export const refreshAccessToken: ValidatedRequestHandler<RefreshTokenRequestSche
 		expiry: Environment.get("REFRESH_TOKEN_EXPIRY"),
 	});
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Token refreshed successfully.",
 		data: responseData,
@@ -110,7 +110,7 @@ export const logoutUser: ValidatedRequestHandler = async (req, res) => {
 	await authService.signOutUser(res.locals.userId, refreshToken);
 	clearCookie(res, "REFRESH_TOKEN", "/refresh");
 
-	return ApiResponse.success(res, {
+	return successResponse(res, {
 		statusCode: HttpStatus.OK,
 		message: "Logout successful.",
 	});

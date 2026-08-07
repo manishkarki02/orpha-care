@@ -2,7 +2,6 @@ import HttpStatus from "http-status";
 import type { ValidatedRequestHandler } from "@/common/types";
 import { successResponse } from "@/common/utils/response.utils";
 import type {
-	CreateVolunteerRequestSchema,
 	UpdateVolunteerRequestSchema,
 	VolunteerRequestIdSchema,
 } from "@/features/volunteer/volunteer.schema";

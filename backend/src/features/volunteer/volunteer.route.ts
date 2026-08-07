@@ -3,7 +3,6 @@ import { accessTokenValidator } from "@/common/middlewares/token.middleware";
 import { validationMiddleware } from "@/common/middlewares/validator.middleware";
 import * as volunteerController from "@/features/volunteer/volunteer.controller";
 import {
-	createVolunteerRequestSchema,
 	updateVolunteerRequestSchema,
 	volunteerRequestIdSchema,
 } from "@/features/volunteer/volunteer.schema";
@@ -51,12 +50,12 @@ const router = Router();
  *         description: Unauthorized
  */
 
-router.post(
-	"/",
-	accessTokenValidator,
-	validationMiddleware(createVolunteerRequestSchema),
-	volunteerController.createVolunteer,
-);
+// router.post(
+// 	"/",
+// 	accessTokenValidator,
+// 	validationMiddleware(createVolunteerRequestSchema),
+// 	volunteerController.createVolunteer,
+// );
 
 /**
  * @swagger

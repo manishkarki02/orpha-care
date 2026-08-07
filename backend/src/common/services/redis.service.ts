@@ -2,8 +2,8 @@ import { createClient, type RedisClientType } from "redis";
 import Environment from "../../config/env.config";
 
 class RedisService {
-	static instance: RedisService;
-	private client!: RedisClientType;
+	private static instance: RedisService;
+	private client: RedisClientType;
 
 	private constructor() {
 		this.client = createClient({
@@ -27,6 +27,13 @@ class RedisService {
 		if (!this.client.isOpen) {
 			await this.client.connect();
 			console.log("✅ Redis connected");
+		}
+	}
+
+	public async disconnect() {
+		if (this.client.isOpen) {
+			await this.client.close();
+			console.log("Redis disconnected");
 		}
 	}
 
