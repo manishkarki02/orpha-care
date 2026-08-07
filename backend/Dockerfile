@@ -1,11 +1,14 @@
 # syntax=docker/dockerfile:1
+
 ARG NODE_VERSION=22.18.0
 ARG PNPM_VERSION=10.20.0
 
 # ---------------------------------
-# BASE
+# Base
 # ---------------------------------
-FROM node:${NODE_VERSION}-alpine as base
+FROM node:${NODE_VERSION}-alpine AS base
+
+ARG PNPM_VERSION
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
@@ -15,20 +18,22 @@ RUN corepack enable \
 
 WORKDIR /app
 
-# ---------------------------------
-# Dependencies installation for development and building
-# ---------------------------------
-FROM base as deps
 
-COPY package.json pnpm-lock.json ./
+# ---------------------------------
+# Development and build dependencies
+# ---------------------------------
+FROM base AS deps
+
+COPY package.json pnpm-lock.yaml ./
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
+
 # ---------------------------------
-# Development includes source and dev dependencies
+# Development
 # ---------------------------------
-FROM deps as dev
+FROM deps AS dev
 
 ENV NODE_ENV=development
 
@@ -36,23 +41,23 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "pnpm", "dev" ]
+CMD ["pnpm", "dev"]
 
 
 # ---------------------------------
-# Build : Compiles the application
+# Application build
 # ---------------------------------
-FROM deps as build
+FROM deps AS build
 
 COPY . .
 
 RUN pnpm prisma:generate
 RUN pnpm build
 
-# --------------------------------------------------
+
+# ---------------------------------
 # Production dependencies
-# Installs only runtime dependencies
-# --------------------------------------------------
+# ---------------------------------
 FROM base AS prod-deps
 
 ENV NODE_ENV=production
@@ -62,10 +67,10 @@ COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
 
-# --------------------------------------------------
+
+# ---------------------------------
 # Production runtime
-# Contains only compiled code and runtime dependencies
-# --------------------------------------------------
+# ---------------------------------
 FROM node:${NODE_VERSION}-alpine AS production
 
 ENV NODE_ENV=production
@@ -75,10 +80,12 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 COPY --from=prod-deps \
-    --chown=node:node /app/node_modules ./node_modules
+    --chown=node:node \
+    /app/node_modules ./node_modules
 
 COPY --from=build \
-    --chown=node:node /app/dist ./dist
+    --chown=node:node \
+    /app/dist ./dist
 
 COPY --chown=node:node package.json ./
 
