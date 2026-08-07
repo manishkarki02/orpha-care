@@ -3,9 +3,10 @@
 ARG NODE_VERSION=22.18.0
 ARG PNPM_VERSION=10.20.0
 
-# ---------------------------------
+
+# ==================================================
 # Base
-# ---------------------------------
+# ==================================================
 FROM node:${NODE_VERSION}-alpine AS base
 
 ARG PNPM_VERSION
@@ -19,9 +20,9 @@ RUN corepack enable \
 WORKDIR /app
 
 
-# ---------------------------------
-# Development and build dependencies
-# ---------------------------------
+# ==================================================
+# All dependencies
+# ==================================================
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml ./
@@ -30,23 +31,23 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
 
-# ---------------------------------
+# ==================================================
 # Development
-# ---------------------------------
+# ==================================================
 FROM deps AS dev
 
 ENV NODE_ENV=development
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 8000
 
 CMD ["pnpm", "dev"]
 
 
-# ---------------------------------
-# Application build
-# ---------------------------------
+# ==================================================
+# Build
+# ==================================================
 FROM deps AS build
 
 COPY . .
@@ -55,9 +56,22 @@ RUN pnpm prisma:generate
 RUN pnpm build
 
 
-# ---------------------------------
+# ==================================================
+# Migration runner
+# ==================================================
+FROM deps AS migration
+
+ENV NODE_ENV=production
+
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
+CMD ["pnpm", "prisma", "migrate", "deploy"]
+
+
+# ==================================================
 # Production dependencies
-# ---------------------------------
+# ==================================================
 FROM base AS prod-deps
 
 ENV NODE_ENV=production
@@ -68,9 +82,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
 
 
-# ---------------------------------
-# Production runtime
-# ---------------------------------
+# ==================================================
+# Production
+# ==================================================
 FROM node:${NODE_VERSION}-alpine AS production
 
 ENV NODE_ENV=production
@@ -91,7 +105,8 @@ COPY --chown=node:node package.json ./
 
 USER node
 
-EXPOSE 3000
+EXPOSE 8000
 
 ENTRYPOINT ["dumb-init", "--"]
+
 CMD ["node", "dist/index.js"]
